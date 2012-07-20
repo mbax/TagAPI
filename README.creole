@@ -1,0 +1,43 @@
+= TagAPI
+== Name all the tags!
+\\
+\\
+\\
+== Super easy instructions
+This plugin is still under development. Currently you can catch every time a player is about to be sent a player spawn packet (with name).
+\\
+The event is PlayerReceiveNameTagEvent\\
+getPlayer is the player getting the packet\\
+getNamedPlayer is the player it's about\\
+getTag is the current tag. If no plugin has modified it, this would be the player's name.\\
+isModified lets you know a plugin has touched it\\
+setTag is self explanatory. It will automatically cut off at 16 chars and return false if it has cut the string you submitted\\
+\\
+\\
+Be polite and register the event on the default unless you absolutely have to.\\
+\\
+Note: You'll probably want to put this event in a separate class that's only loaded if the TagAPI plugin is enabled, 
+or you can run into errors for people without the plugin.  
+Obviously not an issue if you're requiring it as a dependency.
+\\
+Currently VanishNoPacket registers on HIGHEST because if you're invisible in an admin plugin, 
+nobody cares about other name tags they care if you're invisible.\\
+\\
+\\
+If you have any questions, you can contact me in #vanish on esper
+\\
+\\
+=LICENSE
+Copyright 2012 Matt Baxter//
+//
+Licensed under the Apache License, Version 2.0 (the "License");//
+you may not use this file except in compliance with the License.//
+You may obtain a copy of the License at//
+//
+     http://www.apache.org/licenses/LICENSE-2.0//
+//
+Unless required by applicable law or agreed to in writing, software//
+distributed under the License is distributed on an "AS IS" BASIS,//
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.//
+See the License for the specific language governing permissions and//
+limitations under the License.

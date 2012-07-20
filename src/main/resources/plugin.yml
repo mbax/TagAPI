@@ -1,0 +1,5 @@
+name: TagAPI
+main: org.kitteh.tag.TagAPI
+author: mbaxter
+description: Name tag API
+version: '${project.version}'
