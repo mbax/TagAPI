@@ -4,7 +4,7 @@
   <groupId>org.kitteh</groupId>
   <artifactId>tagapi</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <name>TagAPI</name>
   <url>http://github.com/KittehOrg/TagAPI</url>
   <properties>

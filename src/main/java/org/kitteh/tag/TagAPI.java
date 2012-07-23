@@ -81,6 +81,7 @@ public class TagAPI extends JavaPlugin implements Listener {
         final String packetName = this.entityIDMap.get(packet.a);
         if (packetName == null) {
             this.getLogger().fine("Encountered a packet with an unknown entityID. Discarded. ID " + packet.a);
+            return;
         }
         final Player named = this.getServer().getPlayerExact(packetName);
         if (named == null) {
