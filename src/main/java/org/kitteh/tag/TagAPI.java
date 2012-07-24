@@ -16,9 +16,13 @@ package org.kitteh.tag;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Set;
 
+import net.minecraft.server.EntityHuman;
 import net.minecraft.server.Packet20NamedEntitySpawn;
+import net.minecraft.server.Packet29DestroyEntity;
 
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -34,11 +38,91 @@ public class TagAPI extends JavaPlugin implements Listener {
 
     private static TagAPI instance = null;
 
+    /**
+     * Do not touch me. Seriously. Do not touch this method.
+     * 
+     * @param packet
+     * @param destination
+     */
     public static void packet(Packet20NamedEntitySpawn packet, Player destination) {
         if (TagAPI.instance == null) {
             throw new TagAPIException("TagAPI not loaded");
         }
         TagAPI.instance.handlePacket(packet, destination);
+    }
+
+    /**
+     * Flicker the player for anyone who can see him.
+     * 
+     * @param player
+     */
+    public static void refreshPlayer(Player player) {
+        if (TagAPI.instance == null) {
+            throw new TagAPIException("Can't fire TagAPI method while TagAPI is disabled!");
+        }
+        if (player == null) {
+            throw new TagAPIException("Can't submit null player!");
+        }
+        if (!player.isOnline()) {
+            throw new TagAPIException("Can't submit offline player!");
+        }
+        final int id = player.getEntityId();
+        final EntityHuman human = ((CraftPlayer) player).getHandle();
+        for (final Player otherGuy : player.getWorld().getPlayers()) {
+            if (otherGuy.canSee(player)) {
+                final CraftPlayer otherGuyC = (CraftPlayer) otherGuy;
+                otherGuyC.getHandle().netServerHandler.sendPacket(new Packet29DestroyEntity(id));
+                otherGuyC.getHandle().netServerHandler.sendPacket(new Packet20NamedEntitySpawn(human));
+            }
+        }
+    }
+
+    /**
+     * Flicker the player for a player who can see him.
+     * 
+     * @param player
+     * @param forWhom
+     */
+    public static void refreshPlayer(Player player, Player forWhom) {
+        if (TagAPI.instance == null) {
+            throw new TagAPIException("Can't fire TagAPI method while TagAPI is disabled!");
+        }
+        if (player == null) {
+            throw new TagAPIException("Can't submit null player!");
+        }
+        if (forWhom == null) {
+            throw new TagAPIException("Can't submit null forWhom!");
+        }
+        if (forWhom.canSee(player) && player.getWorld().equals(forWhom.getWorld())) {
+            final int id = player.getEntityId();
+            final EntityHuman human = ((CraftPlayer) player).getHandle();
+            final CraftPlayer otherGuyC = (CraftPlayer) forWhom;
+            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet29DestroyEntity(id));
+            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet20NamedEntitySpawn(human));
+        }
+    }
+
+    /**
+     * Flicker the player for anyone in a set of players who can see him.
+     * 
+     * @param player
+     * @param forWhom
+     */
+    public static void refreshPlayer(Player player, Set<Player> forWhom) {
+        if (TagAPI.instance == null) {
+            throw new TagAPIException("Can't fire TagAPI method while TagAPI is disabled!");
+        }
+        if (player == null) {
+            throw new TagAPIException("Can't submit null player!");
+        }
+        if ((forWhom == null) || forWhom.isEmpty()) {
+            throw new TagAPIException("Can't submit empty forWhom!");
+        }
+        for (final Player whom : forWhom) {
+            if (whom != null) {
+                TagAPI.refreshPlayer(player, whom);
+            }
+        }
     }
 
     @Override
@@ -63,7 +147,7 @@ public class TagAPI extends JavaPlugin implements Listener {
         }
         try {
             new MetricsLite(this).start();
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
     }
 
