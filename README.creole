@@ -4,7 +4,10 @@
 \\
 \\
 == Super easy instructions
-This plugin is still under development. Currently you can catch every time a player is about to be sent a player spawn packet (with name).
+\\
+\\
+To easily trigger a refresh of a player's tag, use the static refresh methods in TagAPI.\\
+Might want to catch the TagAPIException though, to ensure you don't spam stuff when your code screws up! :) 
 \\
 The event is PlayerReceiveNameTagEvent\\
 getPlayer is the player getting the packet\\
