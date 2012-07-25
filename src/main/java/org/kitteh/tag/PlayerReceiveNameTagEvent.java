@@ -25,9 +25,9 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
     public static HandlerList getHandlerList() {
         return PlayerReceiveNameTagEvent.handlers;
     }
+
     private boolean modified;
     private final Player named;
-
     private String tag;
 
     public PlayerReceiveNameTagEvent(Player who, Player named) {

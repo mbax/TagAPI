@@ -15,10 +15,12 @@
 package org.kitteh.tag;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.logging.Level;
 
 import net.minecraft.server.EntityHuman;
+import net.minecraft.server.NetworkManager;
 import net.minecraft.server.Packet20NamedEntitySpawn;
 import net.minecraft.server.Packet29DestroyEntity;
 
@@ -32,24 +34,57 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.kitteh.tag.metrics.MetricsLite;
 
-public class TagAPI extends JavaPlugin implements Listener {
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public class TagAPI extends JavaPlugin {
+
+    public class ArrayLizt extends ArrayList {
+
+        private static final long serialVersionUID = 2L;
+
+        private final Player owner;
+
+        private final TagAPI api;
+
+        public ArrayLizt(Player owner, TagAPI api) {
+            this.owner = owner;
+            this.api = api;
+        }
+
+        @Override
+        public boolean add(Object o) {
+            if (o instanceof Packet20NamedEntitySpawn) {
+                try {
+                    this.api.packet(((Packet20NamedEntitySpawn) o), this.owner);
+                } catch (final Exception e) {
+                    // Just in case!
+                }
+            }
+            return super.add(o);
+        }
+
+    }
+
+    @SuppressWarnings("unused")
+    private class HeyListen implements Listener {
+        private final TagAPI api;
+
+        public HeyListen(TagAPI api) {
+            this.api = api;
+        }
+
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onPlayerJoin(PlayerJoinEvent event) {
+            this.api.in(event.getPlayer());
+        }
+
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onPlayerQuit(PlayerQuitEvent event) {
+            this.api.entityIDMap.remove(event.getPlayer().getEntityId());
+        }
+    }
 
     private HashMap<Integer, String> entityIDMap;
-
     private static TagAPI instance = null;
-
-    /**
-     * Do not touch me. Seriously. Do not touch this method.
-     * 
-     * @param packet
-     * @param destination
-     */
-    public static void packet(Packet20NamedEntitySpawn packet, Player destination) {
-        if (TagAPI.instance == null) {
-            throw new TagAPIException("TagAPI not loaded");
-        }
-        TagAPI.instance.handlePacket(packet, destination);
-    }
 
     /**
      * Flicker the player for anyone who can see him.
@@ -125,23 +160,43 @@ public class TagAPI extends JavaPlugin implements Listener {
         }
     }
 
+    private Field syncField;
+
+    private Field highField;
+
+    private boolean wasEnabled;
+
     @Override
     public void onDisable() {
-        for (final Player player : this.getServer().getOnlinePlayers()) {
-            if (player != null) {
-                this.out(player);
+        if (this.wasEnabled) {
+            for (final Player player : this.getServer().getOnlinePlayers()) {
+                if (player != null) {
+                    try {
+                        this.nom(this.getManager(player), Collections.synchronizedList(new ArrayList()), true);
+                    } catch (final Exception e) {
+                        this.getLogger().log(Level.WARNING, "Failed to restore " + player.getName() + ". Could be a problem.", e);
+                    }
+                }
             }
         }
-        ArrayLizt.disable();
         TagAPI.instance = null;
     }
 
     @Override
     public void onEnable() {
-        this.getServer().getPluginManager().registerEvents(this, this);
+        this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
         this.entityIDMap = new HashMap<Integer, String>();
         TagAPI.instance = this;
-        ArrayLizt.enable();
+        try {
+            this.syncField = NetworkManager.class.getDeclaredField("g");
+            this.syncField.setAccessible(true);
+            this.highField = NetworkManager.class.getDeclaredField("highPriorityQueue");
+            this.highField.setAccessible(true);
+        } catch (final Exception e) {
+            this.getLogger().log(Level.SEVERE, "Failed to enable. Check for TagAPI updates.");
+            this.getServer().getPluginManager().disablePlugin(this);
+        }
+        this.wasEnabled = true;
         for (final Player player : this.getServer().getOnlinePlayers()) {
             this.in(player);
         }
@@ -151,14 +206,8 @@ public class TagAPI extends JavaPlugin implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        this.in(event.getPlayer());
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        this.entityIDMap.remove(event.getPlayer().getEntityId());
+    private NetworkManager getManager(Player player) {
+        return ((CraftPlayer) player).getHandle().netServerHandler.networkManager;
     }
 
     private void handlePacket(Packet20NamedEntitySpawn packet, Player destination) {
@@ -189,11 +238,37 @@ public class TagAPI extends JavaPlugin implements Listener {
 
     private void in(Player player) {
         this.entityIDMap.put(player.getEntityId(), player.getName());
-        ArrayLizt.inject(player);
+        try {
+            this.nom(this.getManager(player), Collections.synchronizedList(new ArrayLizt(player, this)));
+        } catch (final Exception e) {
+            new TagAPIException("[TagAPI] Failed to inject into networkmanager for " + player.getName(), e).printStackTrace();
+        }
     }
 
-    private void out(Player player) {
-        ArrayLizt.outject(player);
+    private void nom(NetworkManager nm, List list) throws IllegalArgumentException, IllegalAccessException {
+        this.nom(nm, list, false);
+    }
+
+    private void nom(NetworkManager nm, List list, boolean onlyIfOldIsHacked) throws IllegalArgumentException, IllegalAccessException {
+        final List old = (List) this.highField.get(nm);
+        if (onlyIfOldIsHacked) {
+            if (!(old instanceof ArrayLizt)) {
+                return;
+            }
+        }
+        synchronized (this.syncField.get(nm)) {
+            for (final Object object : old) {
+                list.add(object);
+            }
+            this.highField.set(nm, list);
+        }
+    }
+
+    private void packet(Packet20NamedEntitySpawn packet, Player destination) {
+        if (TagAPI.instance == null) {
+            throw new TagAPIException("TagAPI not loaded");
+        }
+        TagAPI.instance.handlePacket(packet, destination);
     }
 
 }
