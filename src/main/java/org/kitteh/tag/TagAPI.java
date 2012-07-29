@@ -104,7 +104,7 @@ public class TagAPI extends JavaPlugin {
         final int id = player.getEntityId();
         final EntityHuman human = ((CraftPlayer) player).getHandle();
         for (final Player otherGuy : player.getWorld().getPlayers()) {
-            if (otherGuy.canSee(player)) {
+            if ((!otherGuy.equals(player)) && otherGuy.canSee(player)) {
                 final CraftPlayer otherGuyC = (CraftPlayer) otherGuy;
                 otherGuyC.getHandle().netServerHandler.sendPacket(new Packet29DestroyEntity(id));
                 otherGuyC.getHandle().netServerHandler.sendPacket(new Packet20NamedEntitySpawn(human));
@@ -127,6 +127,9 @@ public class TagAPI extends JavaPlugin {
         }
         if (forWhom == null) {
             throw new TagAPIException("Can't submit null forWhom!");
+        }
+        if (player.equals(forWhom)) {
+            throw new TagAPIException("Can't submit player on self!");
         }
         if (forWhom.canSee(player) && player.getWorld().equals(forWhom.getWorld())) {
             final int id = player.getEntityId();
@@ -154,7 +157,7 @@ public class TagAPI extends JavaPlugin {
             throw new TagAPIException("Can't submit empty forWhom!");
         }
         for (final Player whom : forWhom) {
-            if (whom != null) {
+            if ((whom != null) && (!player.equals(whom))) {
                 TagAPI.refreshPlayer(player, whom);
             }
         }
