@@ -169,6 +169,9 @@ public class TagAPI extends JavaPlugin {
 
     private boolean wasEnabled;
 
+    /** 
+     * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
+     */
     @Override
     public void onDisable() {
         if (this.wasEnabled) {
@@ -185,6 +188,9 @@ public class TagAPI extends JavaPlugin {
         TagAPI.instance = null;
     }
 
+    /** 
+     * @see org.bukkit.plugin.java.JavaPlugin#onEnable()
+     */
     @Override
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);

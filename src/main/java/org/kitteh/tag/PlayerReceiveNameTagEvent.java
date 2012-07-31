@@ -19,9 +19,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 
+/**
+ * Here is where the magic is made.
+ * 
+ * Catch this event in order to have an effect on the player's name tag
+ */
 public class PlayerReceiveNameTagEvent extends PlayerEvent {
     private static final HandlerList handlers = new HandlerList();
 
+    /**
+     * This is a Bukkit method. Don't touch me.
+     * 
+     * @return registered handlers to Bukkit
+     */
     public static HandlerList getHandlerList() {
         return PlayerReceiveNameTagEvent.handlers;
     }
@@ -30,6 +40,12 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
     private final Player named;
     private String tag;
 
+    /**
+     * TagAPI creates all the event objects for you.
+     * 
+     * @param who The player who is receiving the nametag info
+     * @param named The player whose nametag we're talking about
+     */
     public PlayerReceiveNameTagEvent(Player who, Player named) {
         super(who);
         this.modified = false;
@@ -42,18 +58,41 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
         return PlayerReceiveNameTagEvent.handlers;
     }
 
+    /**
+     * Get the player whose nametag we're receiving
+     * 
+     * @return the Player whose name is being affected
+     */
     public Player getNamedPlayer() {
         return this.named;
     }
 
+    /**
+     * Get the nametag that will be sent
+     * 
+     * @return String nametag that will be sent
+     */
     public String getTag() {
         return this.tag;
     }
 
+    /**
+     * Has the event been modified yet?
+     * 
+     * Excellent method for plugins wishing to be rather passive
+     * 
+     * @return true if the event has had the tag modified
+     */
     public boolean isModified() {
         return this.modified;
     }
 
+    /**
+     * Set the nametag. Will always set the name tag whether returning true or false.
+     * 
+     * @param tag The desired tag. Only 16 chars accepted. The rest will be truncated.
+     * @return true if accepted as-is, false if it was too long and was truncated.
+     */
     public boolean setTag(String tag) {
         Validate.notNull(tag, "New nametag cannot be null!");
         this.tag = tag;

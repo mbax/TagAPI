@@ -14,6 +14,12 @@
  */
 package org.kitteh.tag;
 
+/**
+ * Uh oh! Something went wrong!
+ * You'll probably want to watch for this RuntimeException,
+ * or at least pay attention to when it can happen so you don't trigger it
+ * and look foolish
+ */
 public class TagAPIException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
