@@ -19,10 +19,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.logging.Level;
 
-import net.minecraft.server.EntityHuman;
-import net.minecraft.server.NetworkManager;
-import net.minecraft.server.Packet20NamedEntitySpawn;
-import net.minecraft.server.Packet29DestroyEntity;
+import net.minecraft.server.*;
 
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -83,7 +80,7 @@ public class TagAPI extends JavaPlugin {
         }
     }
 
-    private HashMap<Integer, String> entityIDMap;
+    private HashMap<Integer, EntityPlayer> entityIDMap;
     private static TagAPI instance = null;
 
     /**
@@ -169,7 +166,7 @@ public class TagAPI extends JavaPlugin {
 
     private boolean wasEnabled;
 
-    /** 
+    /**
      * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
      */
     @Override
@@ -188,13 +185,13 @@ public class TagAPI extends JavaPlugin {
         TagAPI.instance = null;
     }
 
-    /** 
+    /**
      * @see org.bukkit.plugin.java.JavaPlugin#onEnable()
      */
     @Override
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
-        this.entityIDMap = new HashMap<Integer, String>();
+        this.entityIDMap = new HashMap<Integer, EntityPlayer>();
         TagAPI.instance = this;
         try {
             this.syncField = NetworkManager.class.getDeclaredField("g");
@@ -220,14 +217,14 @@ public class TagAPI extends JavaPlugin {
     }
 
     private void handlePacket(Packet20NamedEntitySpawn packet, Player destination) {
-        final String packetName = this.entityIDMap.get(packet.a);
-        if (packetName == null) {
+        final EntityPlayer entity = this.entityIDMap.get(packet.a);
+        if (entity == null) {
             this.getLogger().fine("Encountered a packet with an unknown entityID. Discarded. ID " + packet.a);
             return;
         }
-        final Player named = this.getServer().getPlayerExact(packetName);
+        final Player named = entity.getBukkitEntity();
         if (named == null) {
-            this.getLogger().fine("Player " + packetName + " seems to have logged off during packet sending. Discarded.");
+            this.getLogger().fine("Player " + entity.name + " seems to have violated laws of spacetime. Discarded.");
             return;
         }
         if (destination == null) {
@@ -246,7 +243,7 @@ public class TagAPI extends JavaPlugin {
     }
 
     private void in(Player player) {
-        this.entityIDMap.put(player.getEntityId(), player.getName());
+        this.entityIDMap.put(player.getEntityId(), ((CraftPlayer) player).getHandle());
         try {
             this.nom(this.getManager(player), Collections.synchronizedList(new ArrayLizt(player, this)));
         } catch (final Exception e) {
