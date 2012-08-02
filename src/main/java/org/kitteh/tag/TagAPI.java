@@ -194,10 +194,7 @@ public class TagAPI extends JavaPlugin {
         this.entityIDMap = new HashMap<Integer, EntityPlayer>();
         TagAPI.instance = this;
         try {
-            this.syncField = NetworkManager.class.getDeclaredField("g");
-            if (this.syncField.getType().isPrimitive()) {
-                throw new TagAPIException("Update TagAPI");
-            }
+            this.syncField = NetworkManager.class.getDeclaredField("h");
             this.syncField.setAccessible(true);
             this.highField = NetworkManager.class.getDeclaredField("highPriorityQueue");
             this.highField.setAccessible(true);
