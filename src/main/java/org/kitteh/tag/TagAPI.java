@@ -213,7 +213,7 @@ public class TagAPI extends JavaPlugin {
     }
 
     private NetworkManager getManager(Player player) {
-        return ((CraftPlayer) player).getHandle().netServerHandler.networkManager;
+        return (NetworkManager) ((CraftPlayer) player).getHandle().netServerHandler.networkManager;
     }
 
     private void handlePacket(Packet20NamedEntitySpawn packet, Player destination) {
