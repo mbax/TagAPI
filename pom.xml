@@ -22,7 +22,7 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>craftbukkit</artifactId>
-      <version>RELEASE</version>
+      <version>1.3.1-R0.1-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
   </dependencies>
