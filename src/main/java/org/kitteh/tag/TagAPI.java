@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import net.minecraft.server.*;
 
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -134,6 +135,11 @@ public class TagAPI extends JavaPlugin {
             final CraftPlayer otherGuyC = (CraftPlayer) forWhom;
             otherGuyC.getHandle().netServerHandler.sendPacket(new Packet29DestroyEntity(id));
             otherGuyC.getHandle().netServerHandler.sendPacket(new Packet20NamedEntitySpawn(human));
+            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet5EntityEquipment(id, 0, ((CraftItemStack)player.getItemInHand()).getHandle()));
+            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet5EntityEquipment(id, 1, ((CraftItemStack)player.getInventory().getHelmet()).getHandle()));
+            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet5EntityEquipment(id, 2, ((CraftItemStack)player.getInventory().getChestplate()).getHandle()));
+            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet5EntityEquipment(id, 3, ((CraftItemStack)player.getInventory().getLeggings()).getHandle()));
+            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet5EntityEquipment(id, 4, ((CraftItemStack)player.getInventory().getBoots()).getHandle()));
         }
     }
 
