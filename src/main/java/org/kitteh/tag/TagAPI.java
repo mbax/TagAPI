@@ -28,8 +28,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.kitteh.tag.metrics.MetricsLite;
+import org.kitteh.tag.metrics.Metrics;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class TagAPI extends JavaPlugin {
@@ -60,6 +61,32 @@ public class TagAPI extends JavaPlugin {
         }
 
     }
+    
+    private class HookerTracker extends Metrics.Plotter {
+
+        private final String name;
+        private int value;
+
+        public HookerTracker(String name) {
+            this.name = name;
+            this.value = 0;
+        }
+
+        @Override
+        public String getColumnName() {
+            return this.name;
+        }
+
+        @Override
+        public int getValue() {
+            return this.value;
+        }
+
+        public void increment() {
+            this.value++;
+        }
+        
+    }
 
     @SuppressWarnings("unused")
     private class HeyListen implements Listener {
@@ -79,9 +106,11 @@ public class TagAPI extends JavaPlugin {
             this.api.entityIDMap.remove(event.getPlayer().getEntityId());
         }
     }
-
+    
     private HashMap<Integer, EntityPlayer> entityIDMap;
     private static TagAPI instance = null;
+    private HashMap<String, HookerTracker> hookers;
+    private Metrics metrics;
 
     /**
      * Flicker the player for anyone who can see him.
@@ -192,6 +221,7 @@ public class TagAPI extends JavaPlugin {
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
         this.entityIDMap = new HashMap<Integer, EntityPlayer>();
+        this.hookers = new HashMap<String, HookerTracker>();
         TagAPI.instance = this;
         try {
             this.syncField = NetworkManager.class.getDeclaredField("h");
@@ -207,7 +237,8 @@ public class TagAPI extends JavaPlugin {
             this.in(player);
         }
         try {
-            new MetricsLite(this).start();
+            this.metrics = new Metrics(this);
+            this.metrics.start();
         } catch (final IOException e) {
         }
     }
@@ -232,6 +263,16 @@ public class TagAPI extends JavaPlugin {
             return;
         }
         final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(destination, named);
+        for (RegisteredListener listener : PlayerReceiveNameTagEvent.getHandlerList().getRegisteredListeners()) {
+            if (this.hookers.containsKey(listener.getPlugin().getName())) {
+                this.hookers.get(listener.getPlugin().getName()).increment();
+            } else {
+                HookerTracker tracker =  new HookerTracker(listener.getPlugin().getName());
+                this.metrics.addCustomData(tracker);
+                this.hookers.put(listener.getPlugin().getName(), tracker);
+                tracker.increment();
+            }
+        }
         this.getServer().getPluginManager().callEvent(event);
         if (event.isModified()) {
             String name = event.getTag();
