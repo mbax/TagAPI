@@ -80,7 +80,6 @@ public class TagAPI extends JavaPlugin {
         }
     }
 
-    private HashMap<Integer, EntityPlayer> entityIDMap;
     private static TagAPI instance = null;
 
     /**
@@ -160,11 +159,13 @@ public class TagAPI extends JavaPlugin {
         }
     }
 
-    private Field syncField;
+    private boolean debug;
+    private boolean wasEnabled;
 
+    private Field syncField;
     private Field highField;
 
-    private boolean wasEnabled;
+    private HashMap<Integer, EntityPlayer> entityIDMap;
 
     /**
      * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
@@ -206,9 +207,16 @@ public class TagAPI extends JavaPlugin {
         for (final Player player : this.getServer().getOnlinePlayers()) {
             this.in(player);
         }
+        this.debug = this.getConfig().getBoolean("debug", false);
         try {
             new MetricsLite(this).start();
         } catch (final IOException e) {
+        }
+    }
+
+    private void debug(String message) {
+        if (this.debug) {
+            this.getLogger().info(message);
         }
     }
 
@@ -219,16 +227,16 @@ public class TagAPI extends JavaPlugin {
     private void handlePacket(Packet20NamedEntitySpawn packet, Player destination) {
         final EntityPlayer entity = this.entityIDMap.get(packet.a);
         if (entity == null) {
-            this.getLogger().fine("Encountered a packet with an unknown entityID. Discarded. ID " + packet.a);
+            this.debug("Encountered a packet with an unknown entityID. Discarded. ID " + packet.a);
             return;
         }
         final Player named = entity.getBukkitEntity();
         if (named == null) {
-            this.getLogger().fine("Player " + entity.name + " seems to have violated laws of spacetime. Discarded.");
+            this.debug("Player " + entity.name + " seems to have violated laws of spacetime. Discarded.");
             return;
         }
         if (destination == null) {
-            this.getLogger().fine("Encountered a packet destined for an unknown player. Discarded.");
+            this.debug("Encountered a packet destined for an unknown player. Discarded.");
             return;
         }
         final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(destination, named);
