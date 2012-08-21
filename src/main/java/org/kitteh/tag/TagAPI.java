@@ -58,11 +58,11 @@ public class TagAPI extends JavaPlugin {
             }
             return super.add(o);
         }
-
     }
 
     @SuppressWarnings("unused")
     private class HeyListen implements Listener {
+
         private final TagAPI api;
 
         public HeyListen(TagAPI api) {
@@ -77,6 +77,45 @@ public class TagAPI extends JavaPlugin {
         @EventHandler(priority = EventPriority.MONITOR)
         public void onPlayerQuit(PlayerQuitEvent event) {
             this.api.entityIDMap.remove(event.getPlayer().getEntityId());
+        }
+    }
+
+    private class RefreshPair {
+
+        private final Player seer;
+        private final Player target;
+
+        public RefreshPair(Player seer, Player target) {
+            this.seer = seer;
+            this.target = target;
+        }
+
+        public Player getSeer() {
+            return this.seer;
+        }
+
+        public Player getTarget() {
+            return this.target;
+        }
+    }
+
+    private class ShowBomb implements Runnable {
+
+        private final ArrayList<RefreshPair> pairs = new ArrayList<RefreshPair>();
+
+        public void queue(RefreshPair pair) {
+            this.pairs.add(pair);
+        }
+
+        @Override
+        public void run() {
+            for (final RefreshPair pair : this.pairs) {
+                final Player seer = pair.getSeer();
+                final Player target = pair.getTarget();
+                if ((seer != null) && (target != null)) {
+                    seer.showPlayer(target);
+                }
+            }
         }
     }
 
@@ -97,15 +136,14 @@ public class TagAPI extends JavaPlugin {
         if (!player.isOnline()) {
             throw new TagAPIException("Can't submit offline player!");
         }
-        final int id = player.getEntityId();
-        final EntityHuman human = ((CraftPlayer) player).getHandle();
+        final ShowBomb bomb = TagAPI.instance.new ShowBomb();
         for (final Player otherGuy : player.getWorld().getPlayers()) {
             if ((!otherGuy.equals(player)) && otherGuy.canSee(player)) {
-                final CraftPlayer otherGuyC = (CraftPlayer) otherGuy;
-                otherGuyC.getHandle().netServerHandler.sendPacket(new Packet29DestroyEntity(id));
-                otherGuyC.getHandle().netServerHandler.sendPacket(new Packet20NamedEntitySpawn(human));
+                otherGuy.hidePlayer(player);
+                bomb.queue(TagAPI.instance.new RefreshPair(otherGuy, player));
             }
         }
+        TagAPI.instance.getServer().getScheduler().scheduleSyncDelayedTask(TagAPI.instance, bomb, 2);
     }
 
     /**
@@ -127,13 +165,12 @@ public class TagAPI extends JavaPlugin {
         if (player.equals(forWhom)) {
             throw new TagAPIException("Can't submit player on self!");
         }
+        final ShowBomb bomb = TagAPI.instance.new ShowBomb();
         if (forWhom.canSee(player) && player.getWorld().equals(forWhom.getWorld())) {
-            final int id = player.getEntityId();
-            final EntityHuman human = ((CraftPlayer) player).getHandle();
-            final CraftPlayer otherGuyC = (CraftPlayer) forWhom;
-            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet29DestroyEntity(id));
-            otherGuyC.getHandle().netServerHandler.sendPacket(new Packet20NamedEntitySpawn(human));
+            forWhom.hidePlayer(player);
+            bomb.queue(TagAPI.instance.new RefreshPair(forWhom, player));
         }
+        TagAPI.instance.getServer().getScheduler().scheduleSyncDelayedTask(TagAPI.instance, bomb, 2);
     }
 
     /**
@@ -284,5 +321,4 @@ public class TagAPI extends JavaPlugin {
         }
         TagAPI.instance.handlePacket(packet, destination);
     }
-
 }
