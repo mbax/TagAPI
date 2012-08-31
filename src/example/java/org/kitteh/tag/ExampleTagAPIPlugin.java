@@ -35,16 +35,16 @@ public class ExampleTagAPIPlugin extends JavaPlugin implements Listener {
          * First example. 
          * Every player I see will be Notch
          */
-        if (event.getPlayer().getName().equals("mbaxter")) {
-            event.setTag("Notch");
+        if (event.getPlayer().getName().equals("mbaxter")) { // mbaxter is the user RECEIVING the nametag packet
+            event.setTag("Notch"); // Set the tag for this event to Notch
         }
 
         /*
          * Second example.
-         * If nobody else has touched it, make everyone's name ChatColor.MAGIC
+         * If nobody else has touched the event yet, make everyone's name ChatColor.MAGIC
          */
-        if (!event.isModified()) {
-            event.setTag(ChatColor.MAGIC + event.getNamedPlayer().getName());
+        if (!event.isModified()) { // Event untouched!
+            event.setTag(ChatColor.MAGIC + event.getNamedPlayer().getName()); // Add the magic "color" to everyone's name!
         }
 
         /*
@@ -55,7 +55,7 @@ public class ExampleTagAPIPlugin extends JavaPlugin implements Listener {
         for (final MetadataValue value : event.getNamedPlayer().getMetadata("vanished")) {
             // If this metadata is vanishnopacket -owned 
             //  and the value (value.asBoolean()) is 'true'
-            if (value.getOwningPlugin().getName().equals("VanishNoPacket") && value.asBoolean()) {
+            if (value.getOwningPlugin().getName().equals("VanishNoPacket") && value.asBoolean()) { // If they're vanished
                 event.setTag(ChatColor.BLUE + event.getNamedPlayer().getName());
                 //I can do this because only players who can see vanished players will get sent this
             }
