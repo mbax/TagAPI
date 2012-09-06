@@ -5,26 +5,7 @@
 \\
 == Super easy instructions
 \\
-\\
-To easily trigger a refresh of a player's tag, use the static refresh methods in TagAPI.\\
-Might want to catch the TagAPIException though, to ensure you don't spam stuff when your code screws up! :) 
-\\
-The event is PlayerReceiveNameTagEvent\\
-getPlayer is the player getting the packet\\
-getNamedPlayer is the player it's about\\
-getTag is the current tag. If no plugin has modified it, this would be the player's name.\\
-isModified lets you know a plugin has touched it\\
-setTag is self explanatory. It will automatically cut off at 16 chars and return false if it has cut the string you submitted\\
-\\
-\\
-Be polite and register the event on the default unless you absolutely have to.\\
-\\
-Note: You'll probably want to put this event in a separate class that's only loaded if the TagAPI plugin is enabled, 
-or you can run into errors for people without the plugin.  
-Obviously not an issue if you're requiring it as a dependency.
-\\
-Currently VanishNoPacket registers on HIGHEST because if you're invisible in an admin plugin, 
-nobody cares about other name tags they care if you're invisible.\\
+[[http://forums.bukkit.org/threads/tagapi-change-color-the-name-over-peoples-heads.99485/|Click here for a Bukkit forums post outlining how to use this.]]
 \\
 \\
 If you have any questions, you can contact me in #vanish on esper
