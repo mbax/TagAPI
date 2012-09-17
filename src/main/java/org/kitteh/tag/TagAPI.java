@@ -127,9 +127,7 @@ public class TagAPI extends JavaPlugin {
      * @param player
      */
     public static void refreshPlayer(Player player) {
-        if (TagAPI.instance == null) {
-            throw new TagAPIException("Can't fire TagAPI method while TagAPI is disabled!");
-        }
+        TagAPI.check();
         if (player == null) {
             throw new TagAPIException("Can't submit null player!");
         }
@@ -153,9 +151,7 @@ public class TagAPI extends JavaPlugin {
      * @param forWhom
      */
     public static void refreshPlayer(Player player, Player forWhom) {
-        if (TagAPI.instance == null) {
-            throw new TagAPIException("Can't fire TagAPI method while TagAPI is disabled!");
-        }
+        TagAPI.check();
         if (player == null) {
             throw new TagAPIException("Can't submit null player!");
         }
@@ -180,9 +176,7 @@ public class TagAPI extends JavaPlugin {
      * @param forWhom
      */
     public static void refreshPlayer(Player player, Set<Player> forWhom) {
-        if (TagAPI.instance == null) {
-            throw new TagAPIException("Can't fire TagAPI method while TagAPI is disabled!");
-        }
+        TagAPI.check();
         if (player == null) {
             throw new TagAPIException("Can't submit null player!");
         }
@@ -196,13 +190,22 @@ public class TagAPI extends JavaPlugin {
         }
     }
 
+    private static void check() {
+        if (TagAPI.instance == null) {
+            throw new TagAPIException("Can't fire TagAPI method while TagAPI is disabled!");
+        }
+        if (!Thread.currentThread().equals(TagAPI.mainThread)) {
+            throw new TagAPIException("A plugin attempted to call a TagAPI method from another thread!");
+        }
+    }
+
     private boolean debug;
     private boolean wasEnabled;
-
     private Field syncField;
     private Field highField;
-
     private HashMap<Integer, EntityPlayer> entityIDMap;
+
+    private static Thread mainThread;
 
     /**
      * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
@@ -228,6 +231,7 @@ public class TagAPI extends JavaPlugin {
      */
     @Override
     public void onEnable() {
+        TagAPI.mainThread = Thread.currentThread();
         this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
         this.entityIDMap = new HashMap<Integer, EntityPlayer>();
         TagAPI.instance = this;
