@@ -15,9 +15,9 @@
 package org.kitteh.tag;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
 
 import net.minecraft.server.*;
 
@@ -29,36 +29,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.kitteh.tag.handler.DefaultHandler;
+import org.kitteh.tag.handler.PacketHandler;
 import org.kitteh.tag.metrics.MetricsLite;
 
-@SuppressWarnings({ "unchecked", "rawtypes" })
 public class TagAPI extends JavaPlugin {
-
-    public class ArrayLizt extends ArrayList {
-
-        private static final long serialVersionUID = 2L;
-
-        private final Player owner;
-
-        private final TagAPI api;
-
-        public ArrayLizt(Player owner, TagAPI api) {
-            this.owner = owner;
-            this.api = api;
-        }
-
-        @Override
-        public boolean add(Object o) {
-            if (o instanceof Packet20NamedEntitySpawn) {
-                try {
-                    this.api.packet(((Packet20NamedEntitySpawn) o), this.owner);
-                } catch (final Exception e) {
-                    // Just in case!
-                }
-            }
-            return super.add(o);
-        }
-    }
 
     @SuppressWarnings("unused")
     private class HeyListen implements Listener {
@@ -202,9 +177,8 @@ public class TagAPI extends JavaPlugin {
 
     private boolean debug;
     private boolean wasEnabled;
-    private Field syncField;
-    private Field highField;
     private HashMap<Integer, EntityPlayer> entityIDMap;
+    private PacketHandler handler;
 
     /**
      * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
@@ -214,11 +188,7 @@ public class TagAPI extends JavaPlugin {
         if (this.wasEnabled) {
             for (final Player player : this.getServer().getOnlinePlayers()) {
                 if (player != null) {
-                    try {
-                        this.nom(this.getManager(player), Collections.synchronizedList(new ArrayList()), true);
-                    } catch (final Exception e) {
-                        this.getLogger().log(Level.WARNING, "Failed to restore " + player.getName() + ". Could be a problem.", e);
-                    }
+                    this.out(player);
                 }
             }
         }
@@ -232,18 +202,10 @@ public class TagAPI extends JavaPlugin {
     @Override
     public void onEnable() {
         TagAPI.mainThread = Thread.currentThread();
+        this.handler = new DefaultHandler(this);//TODO INIT HANDLER
         this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
         this.entityIDMap = new HashMap<Integer, EntityPlayer>();
         TagAPI.instance = this;
-        try {
-            this.syncField = NetworkManager.class.getDeclaredField("h");
-            this.syncField.setAccessible(true);
-            this.highField = NetworkManager.class.getDeclaredField("highPriorityQueue");
-            this.highField.setAccessible(true);
-        } catch (final Exception e) {
-            this.getLogger().log(Level.SEVERE, "Failed to enable. Check for TagAPI updates.");
-            this.getServer().getPluginManager().disablePlugin(this);
-        }
         this.wasEnabled = true;
         for (final Player player : this.getServer().getOnlinePlayers()) {
             this.in(player);
@@ -255,14 +217,17 @@ public class TagAPI extends JavaPlugin {
         }
     }
 
+    public void packet(Packet20NamedEntitySpawn packet, Player destination) {
+        if (TagAPI.instance == null) {
+            throw new TagAPIException("TagAPI not loaded");
+        }
+        TagAPI.instance.handlePacket(packet, destination);
+    }
+
     private void debug(String message) {
         if (this.debug) {
             this.getLogger().info(message);
         }
-    }
-
-    private NetworkManager getManager(Player player) {
-        return (NetworkManager) ((CraftPlayer) player).getHandle().netServerHandler.networkManager;
     }
 
     private void handlePacket(Packet20NamedEntitySpawn packet, Player destination) {
@@ -293,36 +258,10 @@ public class TagAPI extends JavaPlugin {
 
     private void in(Player player) {
         this.entityIDMap.put(player.getEntityId(), ((CraftPlayer) player).getHandle());
-        try {
-            this.nom(this.getManager(player), Collections.synchronizedList(new ArrayLizt(player, this)));
-        } catch (final Exception e) {
-            new TagAPIException("[TagAPI] Failed to inject into networkmanager for " + player.getName(), e).printStackTrace();
-        }
+        this.handler.in(player);
     }
 
-    private void nom(NetworkManager nm, List list) throws IllegalArgumentException, IllegalAccessException {
-        this.nom(nm, list, false);
-    }
-
-    private void nom(NetworkManager nm, List list, boolean onlyIfOldIsHacked) throws IllegalArgumentException, IllegalAccessException {
-        final List old = (List) this.highField.get(nm);
-        if (onlyIfOldIsHacked) {
-            if (!(old instanceof ArrayLizt)) {
-                return;
-            }
-        }
-        synchronized (this.syncField.get(nm)) {
-            for (final Object object : old) {
-                list.add(object);
-            }
-            this.highField.set(nm, list);
-        }
-    }
-
-    private void packet(Packet20NamedEntitySpawn packet, Player destination) {
-        if (TagAPI.instance == null) {
-            throw new TagAPIException("TagAPI not loaded");
-        }
-        TagAPI.instance.handlePacket(packet, destination);
+    private void out(Player player) {
+        this.handler.out(player);
     }
 }
