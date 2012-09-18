@@ -31,6 +31,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.kitteh.tag.handler.DefaultHandler;
 import org.kitteh.tag.handler.PacketHandler;
+import org.kitteh.tag.handler.ProtocolLibHandler;
 import org.kitteh.tag.metrics.MetricsLite;
 
 public class TagAPI extends JavaPlugin {
@@ -44,7 +45,7 @@ public class TagAPI extends JavaPlugin {
             this.api = api;
         }
 
-        @EventHandler(priority = EventPriority.MONITOR)
+        @EventHandler(priority = EventPriority.LOWEST)
         public void onPlayerJoin(PlayerJoinEvent event) {
             this.api.in(event.getPlayer());
         }
@@ -186,11 +187,7 @@ public class TagAPI extends JavaPlugin {
     @Override
     public void onDisable() {
         if (this.wasEnabled) {
-            for (final Player player : this.getServer().getOnlinePlayers()) {
-                if (player != null) {
-                    this.out(player);
-                }
-            }
+            this.handler.shutdown();
         }
         TagAPI.instance = null;
         TagAPI.mainThread = null;
@@ -201,16 +198,23 @@ public class TagAPI extends JavaPlugin {
      */
     @Override
     public void onEnable() {
-        TagAPI.mainThread = Thread.currentThread();
-        this.handler = new DefaultHandler(this);//TODO INIT HANDLER
-        this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
-        this.entityIDMap = new HashMap<Integer, EntityPlayer>();
         TagAPI.instance = this;
+        this.entityIDMap = new HashMap<Integer, EntityPlayer>();
+        TagAPI.mainThread = Thread.currentThread();
+        this.debug = this.getConfig().getBoolean("debug", false);
+        if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+            this.handler = new ProtocolLibHandler(this);
+        } else {
+            this.handler = new DefaultHandler(this);
+        }
+        if (!this.getServer().getPluginManager().isPluginEnabled(this)) {
+            return;
+        }
         this.wasEnabled = true;
+        this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
         for (final Player player : this.getServer().getOnlinePlayers()) {
             this.in(player);
         }
-        this.debug = this.getConfig().getBoolean("debug", false);
         try {
             new MetricsLite(this).start();
         } catch (final IOException e) {
@@ -258,10 +262,6 @@ public class TagAPI extends JavaPlugin {
 
     private void in(Player player) {
         this.entityIDMap.put(player.getEntityId(), ((CraftPlayer) player).getHandle());
-        this.handler.in(player);
     }
 
-    private void out(Player player) {
-        this.handler.out(player);
-    }
 }

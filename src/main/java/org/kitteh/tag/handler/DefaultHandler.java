@@ -8,6 +8,10 @@ import java.util.logging.Level;
 
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.kitteh.tag.TagAPI;
 import org.kitteh.tag.TagAPIException;
 
@@ -41,6 +45,22 @@ public class DefaultHandler implements PacketHandler {
             return super.add(o);
         }
     }
+
+    @SuppressWarnings("unused")
+    private class HandlerListener implements Listener {
+
+        private final DefaultHandler handler;
+
+        public HandlerListener(DefaultHandler handler) {
+            this.handler = handler;
+        }
+
+        @EventHandler(priority = EventPriority.MONITOR)
+        public void onPlayerJoin(PlayerJoinEvent event) {
+            this.handler.in(event.getPlayer());
+        }
+    }
+
     private Field syncField;
     private Field highField;
 
@@ -57,9 +77,9 @@ public class DefaultHandler implements PacketHandler {
             plugin.getLogger().log(Level.SEVERE, "Failed to enable. Check for TagAPI updates.");
             plugin.getServer().getPluginManager().disablePlugin(plugin);
         }
+        this.plugin.getServer().getPluginManager().registerEvents(new HandlerListener(this), this.plugin);
     }
 
-    @Override
     public void in(Player player) {
         try {
             this.nom(this.getManager(player), Collections.synchronizedList(new ArrayLizt(player, this.plugin)));
@@ -68,12 +88,20 @@ public class DefaultHandler implements PacketHandler {
         }
     }
 
-    @Override
     public void out(Player player) {
         try {
             this.nom(this.getManager(player), Collections.synchronizedList(new ArrayList()), true);
         } catch (final Exception e) {
             this.plugin.getLogger().log(Level.WARNING, "Failed to restore " + player.getName() + ". Could be a problem.", e);
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        for (final Player player : this.plugin.getServer().getOnlinePlayers()) {
+            if (player != null) {
+                this.out(player);
+            }
         }
     }
 
