@@ -43,8 +43,10 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
     /**
      * TagAPI creates all the event objects for you.
      * 
-     * @param who The player who is receiving the nametag info
-     * @param named The player whose nametag we're talking about
+     * @param who
+     *            The player who is receiving the nametag info
+     * @param named
+     *            The player whose nametag we're talking about
      */
     public PlayerReceiveNameTagEvent(Player who, Player named) {
         super(who);
@@ -90,7 +92,8 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
     /**
      * Set the nametag. Will always set the name tag whether returning true or false.
      * 
-     * @param tag The desired tag. Only 16 chars accepted. The rest will be truncated.
+     * @param tag
+     *            The desired tag. Only 16 chars accepted. The rest will be truncated.
      * @return true if accepted as-is, false if it was too long and was truncated.
      */
     public boolean setTag(String tag) {

@@ -120,6 +120,7 @@ public class TagAPI extends JavaPlugin {
     }
 
     private static TagAPI instance = null;
+    private static Thread mainThread = null;
 
     /**
      * Flicker the player for anyone who can see him.
@@ -205,8 +206,6 @@ public class TagAPI extends JavaPlugin {
     private Field highField;
     private HashMap<Integer, EntityPlayer> entityIDMap;
 
-    private static Thread mainThread;
-
     /**
      * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
      */
@@ -224,6 +223,7 @@ public class TagAPI extends JavaPlugin {
             }
         }
         TagAPI.instance = null;
+        TagAPI.mainThread = null;
     }
 
     /**
