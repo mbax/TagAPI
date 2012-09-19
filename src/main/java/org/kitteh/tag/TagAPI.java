@@ -203,6 +203,7 @@ public class TagAPI extends JavaPlugin {
         TagAPI.mainThread = Thread.currentThread();
         this.debug = this.getConfig().getBoolean("debug", false);
         if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+            this.getLogger().info("Detected ProtocolLib, using that for handling!");
             this.handler = new ProtocolLibHandler(this);
         } else {
             this.handler = new DefaultHandler(this);
