@@ -76,6 +76,7 @@ public class DefaultHandler implements PacketHandler {
         } catch (final Exception e) {
             plugin.getLogger().log(Level.SEVERE, "Failed to enable. Check for TagAPI updates.");
             plugin.getServer().getPluginManager().disablePlugin(plugin);
+            return;
         }
         this.plugin.getServer().getPluginManager().registerEvents(new HandlerListener(this), this.plugin);
     }
