@@ -30,9 +30,9 @@
       <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>com.comphenix</groupId>
+      <groupId>com.comphenix.protocol</groupId>
       <artifactId>ProtocolLib</artifactId>
-      <version>1.1.0</version>
+      <version>1.5.1</version>
       <type>jar</type>
     </dependency>
   </dependencies>
