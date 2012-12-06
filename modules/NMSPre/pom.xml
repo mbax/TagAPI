@@ -15,6 +15,7 @@
     <groupId>org.kitteh</groupId>
     <artifactId>tagapi-parent</artifactId>
     <version>1.8.1-SNAPSHOT</version>
+    <relativePath>../../</relativePath>
   </parent>
 
   <dependencies>
@@ -33,7 +34,7 @@
   </dependencies>
 
   <build>
-    <sourceDirectory>../src/main/java</sourceDirectory>
+    <sourceDirectory>../../src/main/java</sourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

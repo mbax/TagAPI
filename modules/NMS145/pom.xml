@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitteh</groupId>
-  <artifactId>tagapi-api</artifactId>
+  <artifactId>tagapi-nms145</artifactId>
   <packaging>jar</packaging>
-  <name>TagAPI-API</name>
+  <name>TagAPI-NMS145</name>
   <url>http://github.com/KittehOrg/TagAPI</url>
 
   <properties>
@@ -15,19 +15,26 @@
     <groupId>org.kitteh</groupId>
     <artifactId>tagapi-parent</artifactId>
     <version>1.8.1-SNAPSHOT</version>
+    <relativePath>../../</relativePath>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>craftbukkit</artifactId>
-      <version>LATEST</version>
+      <version>1.4.5-R0.3-SNAPSHOT</version>
+      <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>org.kitteh</groupId>
+      <artifactId>tagapi-api</artifactId>
+      <version>${project.version}</version>
       <type>jar</type>
     </dependency>
   </dependencies>
 
   <build>
-    <sourceDirectory>../src/main/java</sourceDirectory>
+    <sourceDirectory>../../src/main/java</sourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -43,7 +50,7 @@
         <version>3.0</version>
         <configuration>
           <includes>
-            <include>org/kitteh/tag/api/**</include>
+            <include>org/kitteh/tag/compat/nms145/**</include>
           </includes>
         </configuration>
       </plugin>
@@ -53,7 +60,7 @@
         <version>2.4</version>
         <configuration>
           <includes>
-            <include>org/kitteh/tag/api/**</include>
+            <include>org/kitteh/tag/compat/nms145/**</include>
           </includes>
         </configuration>
       </plugin>

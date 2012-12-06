@@ -12,10 +12,10 @@
   </properties>
 
   <modules>
-    <module>API</module>
-    <module>NMSPre</module>
-    <module>NMS145</module>
-    <module>TagAPI</module>
+    <module>modules/API</module>
+    <module>modules/NMSPre</module>
+    <module>modules/NMS145</module>
+    <module>modules/TagAPI</module>
   </modules>
 
   <repositories>
