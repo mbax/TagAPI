@@ -1,4 +1,4 @@
-package org.kitteh.tag.compat.nms145pre;
+package org.kitteh.tag.compat.v1_4_5;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -6,15 +6,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_4_5.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.kitteh.tag.api.PacketHandler;
 import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.api.Packet;
 import org.kitteh.tag.api.TagAPIException;
 
-import net.minecraft.server.NetworkManager;
-import net.minecraft.server.Packet20NamedEntitySpawn;
+import net.minecraft.server.v1_4_5.NetworkManager;
+import net.minecraft.server.v1_4_5.Packet20NamedEntitySpawn;
 
 public class DefaultHandler extends PacketHandler {
 
@@ -50,15 +50,6 @@ public class DefaultHandler extends PacketHandler {
             this.listSwap(player, Collections.synchronizedList(new ArrayList<Object>()), true);
         } catch (final Exception e) {
             this.plugin.getLogger().log(Level.WARNING, "Failed to restore " + player.getName() + ". Could be a problem.", e);
-        }
-    }
-
-    @Override
-    public void shutdown() {
-        for (final Player player : this.plugin.getServer().getOnlinePlayers()) {
-            if (player != null) {
-                this.releasePlayer(player);
-            }
         }
     }
 

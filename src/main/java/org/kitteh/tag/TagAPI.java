@@ -27,8 +27,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.kitteh.tag.api.Packet;
 import org.kitteh.tag.api.IPacketHandler;
+import org.kitteh.tag.api.Packet;
 import org.kitteh.tag.api.TagAPIException;
 import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.handler.ProtocolLibHandler;
@@ -207,19 +207,24 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         this.entityIDMap = new HashMap<Integer, Player>();
         TagAPI.mainThread = Thread.currentThread();
         this.debug = this.getConfig().getBoolean("debug", false);
+
+        final String pack = this.getServer().getClass().getPackage().getName();
+        String cbversion = pack.substring(pack.lastIndexOf('.') + 1);
+
         if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
             this.getLogger().info("Detected ProtocolLib, using that for handling!");
             this.handler = new ProtocolLibHandler(this);
         } else {
-            try {
-                Class.forName("net.minecraft.server.Packet");
-                this.handler = new org.kitteh.tag.compat.nms145pre.DefaultHandler(this);
-            } catch (final ClassNotFoundException e) {
+            if (cbversion.equals("craftbukkit")) {
+                cbversion = "pre";
             }
             try {
-                Class.forName("net.minecraft.server.v1_4_5.Packet");
-                this.handler = new org.kitteh.tag.compat.nms145.DefaultHandler(this);
-            } catch (final ClassNotFoundException e) {
+                final Class<?> clazz = Class.forName("org.kitteh.tag.compat." + cbversion + ".DefaultHandler");
+                if (IPacketHandler.class.isAssignableFrom(clazz)) {
+                    this.handler = (IPacketHandler) clazz.getConstructor(TagHandler.class).newInstance(this);
+                }
+            } catch (final Exception e) {
+                e.printStackTrace();
             }
         }
         if (this.handler == null) {
@@ -228,6 +233,8 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         if (!this.getServer().getPluginManager().isPluginEnabled(this)) {
             return;
         }
+
+        this.getLogger().info("Using hooks for CraftBukkit " + (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion));
 
         this.handler.startup();
         this.wasEnabled = true;

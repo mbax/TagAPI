@@ -20,13 +20,13 @@
   <dependencies>
     <dependency>
       <groupId>org.kitteh</groupId>
-      <artifactId>tagapi-nmspre</artifactId>
+      <artifactId>tagapi-vpre</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>org.kitteh</groupId>
-      <artifactId>tagapi-nms145</artifactId>
+      <artifactId>tagapi-v1_4_5</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
     </dependency>
@@ -52,7 +52,7 @@
       <resource>
         <targetPath>.</targetPath>
         <filtering>true</filtering>
-        <directory>../src/main/resources</directory>
+        <directory>../../src/main/resources</directory>
         <includes>
           <include>plugin.yml</include>
         </includes>

@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kitteh</groupId>
-  <artifactId>tagapi-nmspre</artifactId>
+  <artifactId>tagapi-vpre</artifactId>
   <packaging>jar</packaging>
-  <name>TagAPI-NMSPre</name>
+  <name>TagAPI-vPre</name>
   <url>http://github.com/KittehOrg/TagAPI</url>
 
   <properties>
@@ -50,7 +50,7 @@
         <version>3.0</version>
         <configuration>
           <includes>
-            <include>org/kitteh/tag/compat/nms145pre/**</include>
+            <include>org/kitteh/tag/compat/pre/**</include>
           </includes>
         </configuration>
       </plugin>
@@ -60,7 +60,7 @@
         <version>2.4</version>
         <configuration>
           <includes>
-            <include>org/kitteh/tag/compat/nms145pre/**</include>
+            <include>org/kitteh/tag/compat/pre/**</include>
           </includes>
         </configuration>
       </plugin>

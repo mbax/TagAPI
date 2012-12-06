@@ -13,8 +13,8 @@
 
   <modules>
     <module>modules/API</module>
-    <module>modules/NMSPre</module>
-    <module>modules/NMS145</module>
+    <module>modules/vPre</module>
+    <module>modules/v1_4_5</module>
     <module>modules/TagAPI</module>
   </modules>
 
