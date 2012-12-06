@@ -38,7 +38,7 @@
     </dependency>
     <dependency>
       <groupId>org.bukkit</groupId>
-      <artifactId>craftbukkit</artifactId>
+      <artifactId>bukkit</artifactId>
       <version>LATEST</version>
       <type>jar</type>
     </dependency>
