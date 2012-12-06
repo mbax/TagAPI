@@ -28,7 +28,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.kitteh.tag.api.Packet;
-import org.kitteh.tag.api.PacketHandler;
+import org.kitteh.tag.api.IPacketHandler;
 import org.kitteh.tag.api.TagAPIException;
 import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.handler.ProtocolLibHandler;
@@ -179,7 +179,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     private boolean debug;
     private boolean wasEnabled;
     private HashMap<Integer, Player> entityIDMap;
-    private PacketHandler handler;
+    private IPacketHandler handler;
 
     @Override
     public Plugin getPlugin() {
@@ -228,6 +228,8 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         if (!this.getServer().getPluginManager().isPluginEnabled(this)) {
             return;
         }
+
+        this.handler.startup();
         this.wasEnabled = true;
         this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
         for (final Player player : this.getServer().getOnlinePlayers()) {

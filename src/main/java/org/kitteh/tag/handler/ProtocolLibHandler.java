@@ -2,7 +2,7 @@ package org.kitteh.tag.handler;
 
 import org.kitteh.tag.TagAPI;
 import org.kitteh.tag.api.Packet;
-import org.kitteh.tag.api.PacketHandler;
+import org.kitteh.tag.api.IPacketHandler;
 
 import com.comphenix.protocol.Packets;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -13,12 +13,21 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.FieldAccessException;
 
-public class ProtocolLibHandler implements PacketHandler {
+public class ProtocolLibHandler implements IPacketHandler {
 
-    private TagAPI plugin;
+    private final TagAPI plugin;
 
     public ProtocolLibHandler(TagAPI plugin) {
         this.plugin = plugin;
+    }
+
+    @Override
+    public void shutdown() {
+        ProtocolLibrary.getProtocolManager().removePacketListeners(this.plugin);
+    }
+
+    @Override
+    public void startup() {
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this.plugin, ConnectionSide.SERVER_SIDE, ListenerPriority.NORMAL, Packets.Server.NAMED_ENTITY_SPAWN) {
             @Override
             public void onPacketSending(PacketEvent event) {
@@ -35,11 +44,6 @@ public class ProtocolLibHandler implements PacketHandler {
                 }
             }
         });
-    }
-
-    @Override
-    public void shutdown() {
-        ProtocolLibrary.getProtocolManager().removePacketListeners(this.plugin);
     }
 
 }

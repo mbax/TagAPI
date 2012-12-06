@@ -14,7 +14,7 @@
   <parent>
     <groupId>org.kitteh</groupId>
     <artifactId>tagapi-parent</artifactId>
-    <version>1.8</version>
+    <version>1.8.1-SNAPSHOT</version>
   </parent>
 
   <dependencies>
