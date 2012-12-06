@@ -4,7 +4,7 @@
   <groupId>org.kitteh</groupId>
   <artifactId>tagapi-parent</artifactId>
   <packaging>pom</packaging>
-  <version>1.8-SNAPSHOT</version>
+  <version>1.8</version>
   <name>TagAPI Parent Pom Nom Nom</name>
   <url>http://github.com/KittehOrg/TagAPI</url>
   <properties>
