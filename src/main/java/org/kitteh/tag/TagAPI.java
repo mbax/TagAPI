@@ -224,7 +224,8 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                     this.handler = (IPacketHandler) clazz.getConstructor(TagHandler.class).newInstance(this);
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
+                this.getLogger().severe("Could not find support for this CraftBukkit version. Check for an update or pester mbaxter.");
+                this.getLogger().info("Update hopefully available at http://dev.bukkit.org/server-mods/tag");
             }
         }
         if (this.handler == null) {
