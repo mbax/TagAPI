@@ -19,22 +19,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
-import net.minecraft.server.*;
-
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.kitteh.tag.handler.DefaultHandler;
-import org.kitteh.tag.handler.PacketHandler;
+import org.kitteh.tag.api.Packet;
+import org.kitteh.tag.api.PacketHandler;
+import org.kitteh.tag.api.TagAPIException;
+import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.handler.ProtocolLibHandler;
 import org.kitteh.tag.metrics.MetricsLite;
 
-public class TagAPI extends JavaPlugin {
+public class TagAPI extends JavaPlugin implements TagHandler {
 
     @SuppressWarnings("unused")
     private class HeyListen implements Listener {
@@ -178,8 +178,13 @@ public class TagAPI extends JavaPlugin {
 
     private boolean debug;
     private boolean wasEnabled;
-    private HashMap<Integer, EntityPlayer> entityIDMap;
+    private HashMap<Integer, Player> entityIDMap;
     private PacketHandler handler;
+
+    @Override
+    public Plugin getPlugin() {
+        return this;
+    }
 
     /**
      * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
@@ -199,14 +204,26 @@ public class TagAPI extends JavaPlugin {
     @Override
     public void onEnable() {
         TagAPI.instance = this;
-        this.entityIDMap = new HashMap<Integer, EntityPlayer>();
+        this.entityIDMap = new HashMap<Integer, Player>();
         TagAPI.mainThread = Thread.currentThread();
         this.debug = this.getConfig().getBoolean("debug", false);
         if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
             this.getLogger().info("Detected ProtocolLib, using that for handling!");
             this.handler = new ProtocolLibHandler(this);
         } else {
-            this.handler = new DefaultHandler(this);
+            try {
+                Class.forName("net.minecraft.server.Packet");
+                this.handler = new org.kitteh.tag.compat.nms145pre.DefaultHandler(this);
+            } catch (final ClassNotFoundException e) {
+            }
+            try {
+                Class.forName("net.minecraft.server.v1_4_5.Packet");
+                this.handler = new org.kitteh.tag.compat.nms145.DefaultHandler(this);
+            } catch (final ClassNotFoundException e) {
+            }
+        }
+        if (this.handler == null) {
+            this.setEnabled(false);
         }
         if (!this.getServer().getPluginManager().isPluginEnabled(this)) {
             return;
@@ -222,7 +239,8 @@ public class TagAPI extends JavaPlugin {
         }
     }
 
-    public void packet(Packet20NamedEntitySpawn packet, Player destination) {
+    @Override
+    public void packet(Packet packet, Player destination) {
         if (TagAPI.instance == null) {
             throw new TagAPIException("TagAPI not loaded");
         }
@@ -235,15 +253,10 @@ public class TagAPI extends JavaPlugin {
         }
     }
 
-    private void handlePacket(Packet20NamedEntitySpawn packet, Player destination) {
-        final EntityPlayer entity = this.entityIDMap.get(packet.a);
-        if (entity == null) {
-            this.debug("Encountered a packet with an unknown entityID. Discarded. ID " + packet.a);
-            return;
-        }
-        final Player named = entity.getBukkitEntity();
+    private void handlePacket(Packet packet, Player destination) {
+        final Player named = this.entityIDMap.get(packet.entityId);
         if (named == null) {
-            this.debug("Player " + entity.name + " seems to have violated laws of spacetime. Discarded.");
+            this.debug("Could not find entity ID " + packet.entityId + ". Discarded.");
             return;
         }
         if (destination == null) {
@@ -257,12 +270,12 @@ public class TagAPI extends JavaPlugin {
             if (name.length() > 16) {
                 name = name.substring(0, 16);
             }
-            packet.b = name;
+            packet.tag = name;
         }
     }
 
     private void in(Player player) {
-        this.entityIDMap.put(player.getEntityId(), ((CraftPlayer) player).getHandle());
+        this.entityIDMap.put(player.getEntityId(), player);
     }
 
 }

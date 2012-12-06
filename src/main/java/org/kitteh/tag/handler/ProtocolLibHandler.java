@@ -1,17 +1,17 @@
 package org.kitteh.tag.handler;
 
-import net.minecraft.server.Packet;
-import net.minecraft.server.Packet20NamedEntitySpawn;
-
 import org.kitteh.tag.TagAPI;
-import org.kitteh.tag.TagAPIException;
+import org.kitteh.tag.api.Packet;
+import org.kitteh.tag.api.PacketHandler;
 
 import com.comphenix.protocol.Packets;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ConnectionSide;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.reflect.FieldAccessException;
 
 public class ProtocolLibHandler implements PacketHandler {
 
@@ -25,11 +25,13 @@ public class ProtocolLibHandler implements PacketHandler {
                 if (event.getPacketID() != Packets.Server.NAMED_ENTITY_SPAWN) {
                     return;
                 }
-                final Packet packet = event.getPacket().getHandle();
-                if (packet instanceof Packet20NamedEntitySpawn) {
-                    ProtocolLibHandler.this.plugin.packet((Packet20NamedEntitySpawn) packet, event.getPlayer());
-                } else {
-                    throw new TagAPIException("Got a packet of type " + packet.getClass() + " instead of expected type");
+                final PacketContainer packetContainer = event.getPacket();
+                try {
+                    final Packet packet = new Packet(packetContainer.getSpecificModifier(String.class).read(0), packetContainer.getSpecificModifier(int.class).read(0));
+                    ProtocolLibHandler.this.plugin.packet(packet, event.getPlayer());
+                    packetContainer.getSpecificModifier(String.class).write(0, packet.tag);
+                } catch (final FieldAccessException e) {
+                    e.printStackTrace();
                 }
             }
         });

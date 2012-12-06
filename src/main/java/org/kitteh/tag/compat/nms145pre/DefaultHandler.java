@@ -1,4 +1,4 @@
-package org.kitteh.tag.handler;
+package org.kitteh.tag.compat.nms145pre;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -12,8 +12,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.kitteh.tag.TagAPI;
-import org.kitteh.tag.TagAPIException;
+import org.bukkit.plugin.Plugin;
+import org.kitteh.tag.api.PacketHandler;
+import org.kitteh.tag.api.TagHandler;
+import org.kitteh.tag.api.Packet;
+import org.kitteh.tag.api.TagAPIException;
 
 import net.minecraft.server.NetworkManager;
 import net.minecraft.server.Packet20NamedEntitySpawn;
@@ -26,9 +29,9 @@ public class DefaultHandler implements PacketHandler {
 
         private final Player owner;
 
-        private final TagAPI api;
+        private final TagHandler api;
 
-        public ArrayLizt(Player owner, TagAPI api) {
+        public ArrayLizt(Player owner, TagHandler api) {
             this.owner = owner;
             this.api = api;
         }
@@ -37,7 +40,10 @@ public class DefaultHandler implements PacketHandler {
         public boolean add(Object o) {
             if (o instanceof Packet20NamedEntitySpawn) {
                 try {
-                    this.api.packet(((Packet20NamedEntitySpawn) o), this.owner);
+                    final Packet20NamedEntitySpawn packet = ((Packet20NamedEntitySpawn) o);
+                    final Packet p = new Packet(packet.b, packet.a);
+                    this.api.packet(p, this.owner);
+                    packet.b = p.tag;
                 } catch (final Exception e) {
                     // Just in case!
                 }
@@ -64,18 +70,20 @@ public class DefaultHandler implements PacketHandler {
     private Field syncField;
     private Field highField;
 
-    private final TagAPI plugin;
+    private final Plugin plugin;
+    private final TagHandler handler;
 
-    public DefaultHandler(TagAPI plugin) {
-        this.plugin = plugin;
+    public DefaultHandler(TagHandler handler) {
+        this.plugin = handler.getPlugin();
+        this.handler = handler;
         try {
             this.syncField = NetworkManager.class.getDeclaredField("h");
             this.syncField.setAccessible(true);
             this.highField = NetworkManager.class.getDeclaredField("highPriorityQueue");
             this.highField.setAccessible(true);
         } catch (final Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "Failed to enable. Check for TagAPI updates.");
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            this.plugin.getLogger().log(Level.SEVERE, "Failed to enable. Check for TagAPI updates.");
+            this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
             return;
         }
         this.plugin.getServer().getPluginManager().registerEvents(new HandlerListener(this), this.plugin);
@@ -83,7 +91,7 @@ public class DefaultHandler implements PacketHandler {
 
     public void in(Player player) {
         try {
-            this.nom(this.getManager(player), Collections.synchronizedList(new ArrayLizt(player, this.plugin)));
+            this.nom(this.getManager(player), Collections.synchronizedList(new ArrayLizt(player, this.handler)));
         } catch (final Exception e) {
             new TagAPIException("[TagAPI] Failed to inject into networkmanager for " + player.getName(), e).printStackTrace();
         }
