@@ -26,21 +26,21 @@
     <dependency>
       <groupId>org.kitteh</groupId>
       <artifactId>tagapi-vpre</artifactId>
-      <version>${project.version}</version>
+      <version>vpre</version>
       <type>jar</type>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.kitteh</groupId>
       <artifactId>tagapi-v1_4_5</artifactId>
-      <version>${project.version}</version>
+      <version>v1_4_5</version>
       <type>jar</type>
       <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.kitteh</groupId>
       <artifactId>tagapi-api</artifactId>
-      <version>${project.version}</version>
+      <version>API</version>
       <type>jar</type>
       <optional>true</optional>
     </dependency>
@@ -140,6 +140,9 @@
                 <includes>
                   <include>org.kitteh:tag*</include>
                 </includes>
+                <excludes>
+                  <exclude>org.kitteh:tagapi-api</exclude>
+                </excludes>
               </artifactSet>
             </configuration>
           </execution>

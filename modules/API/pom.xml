@@ -6,6 +6,7 @@
   <packaging>jar</packaging>
   <name>TagAPI-API</name>
   <url>http://github.com/KittehOrg/TagAPI</url>
+  <version>API</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -14,7 +15,7 @@
   <parent>
     <groupId>org.kitteh</groupId>
     <artifactId>tagapi-parent</artifactId>
-    <version>1.8.1-SNAPSHOT</version>
+    <version>parent</version>
     <relativePath>../../</relativePath>
   </parent>
 
