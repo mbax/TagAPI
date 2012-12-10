@@ -9,13 +9,18 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <version>1.8.1-SNAPSHOT</version>
 
-  <parent>
-    <groupId>org.kitteh</groupId>
-    <artifactId>tagapi-parent</artifactId>
-    <version>1.8.1-SNAPSHOT</version>
-    <relativePath>../../</relativePath>
-  </parent>
+  <repositories>
+    <repository>
+      <id>kitteh-repo</id>
+      <url>http://repo.kitteh.org/content/groups/public</url>
+    </repository>
+    <repository>
+      <id>bukkit-repo</id>
+      <url>http://repo.bukkit.org/content/groups/public</url>
+    </repository>
+  </repositories>
 
   <dependencies>
     <dependency>
@@ -23,18 +28,21 @@
       <artifactId>tagapi-vpre</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.kitteh</groupId>
       <artifactId>tagapi-v1_4_5</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.kitteh</groupId>
       <artifactId>tagapi-api</artifactId>
       <version>${project.version}</version>
       <type>jar</type>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.bukkit</groupId>
@@ -42,7 +50,27 @@
       <version>LATEST</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>com.comphenix.protocol</groupId>
+      <artifactId>ProtocolLib</artifactId>
+      <version>1.5.1</version>
+      <type>jar</type>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
+
+  <distributionManagement>
+    <repository>
+      <id>kittehReleases</id>
+      <name>Kitteh Releases</name>
+      <url>http://repo.kitteh.org/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+      <id>kittehSnapshots</id>
+      <name>Kitteh Snapshots</name>
+      <url>http://repo.kitteh.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <build>
     <finalName>TagAPI</finalName>

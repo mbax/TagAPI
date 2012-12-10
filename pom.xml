@@ -29,28 +29,6 @@
     </repository>
   </repositories>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.comphenix.protocol</groupId>
-      <artifactId>ProtocolLib</artifactId>
-      <version>1.5.1</version>
-      <type>jar</type>
-    </dependency>
-  </dependencies>
-
-  <distributionManagement>
-    <repository>
-      <id>kittehReleases</id>
-      <name>Kitteh Releases</name>
-      <url>http://repo.kitteh.org/content/repositories/releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>kittehSnapshots</id>
-      <name>Kitteh Snapshots</name>
-      <url>http://repo.kitteh.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
-
   <build>
     <plugins>
       <plugin>
