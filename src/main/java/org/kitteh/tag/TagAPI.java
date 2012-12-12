@@ -208,13 +208,15 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         TagAPI.mainThread = Thread.currentThread();
         this.debug = this.getConfig().getBoolean("debug", false);
 
-        final String pack = this.getServer().getClass().getPackage().getName();
-        String cbversion = pack.substring(pack.lastIndexOf('.') + 1);
+        String versionLoaded;
 
         if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
             this.getLogger().info("Detected ProtocolLib, using that for handling!");
             this.handler = new ProtocolLibHandler(this);
+            versionLoaded = "via ProtocolLib";
         } else {
+            final String packageName = this.getServer().getClass().getPackage().getName();
+            String cbversion = packageName.substring(packageName.lastIndexOf('.') + 1);
             if (cbversion.equals("craftbukkit")) {
                 cbversion = "pre";
             }
@@ -227,6 +229,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                 this.getLogger().severe("Could not find support for this CraftBukkit version. Check for an update or pester mbaxter.");
                 this.getLogger().info("Update hopefully available at http://dev.bukkit.org/server-mods/tag");
             }
+            versionLoaded = (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion);
         }
         if (this.handler == null) {
             this.setEnabled(false);
@@ -235,7 +238,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             return;
         }
 
-        this.getLogger().info("Using hooks for CraftBukkit " + (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion));
+        this.getLogger().info("Using hooks for CraftBukkit " + versionLoaded);
 
         this.handler.startup();
         this.wasEnabled = true;
