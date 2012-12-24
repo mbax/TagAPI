@@ -28,8 +28,9 @@ public class DefaultHandler extends PacketHandler {
             this.syncField.setAccessible(true);
             this.highField = NetworkManager.class.getDeclaredField("highPriorityQueue");
             this.highField.setAccessible(true);
+            net.minecraft.server.EntityPlayer.class.getDeclaredField("netServerHandler");
         } catch (final Exception e) {
-            this.plugin.getLogger().log(Level.SEVERE, "Failed to enable. Check for TagAPI updates.");
+            this.plugin.getLogger().log(Level.SEVERE, "TagAPI is only compatible with 1.4 and beyond.", e);
             this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
             return;
         }
