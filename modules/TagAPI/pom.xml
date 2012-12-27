@@ -94,7 +94,7 @@
       </resource>
       <resource>
         <targetPath>.</targetPath>
-        <directory>${basedir}/</directory>
+        <directory>../../</directory>
         <includes>
           <include>LICENSE</include>
         </includes>
