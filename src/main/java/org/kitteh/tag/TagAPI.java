@@ -97,6 +97,16 @@ public class TagAPI extends JavaPlugin implements TagHandler {
 
     private static TagAPI instance = null;
     private static Thread mainThread = null;
+    private static String version = null;
+
+    /**
+     * Gets the TagAPI version running on the server.
+     * 
+     * @return version
+     */
+    public static String getVersion() {
+        return version;
+    }
 
     /**
      * Flicker the player for anyone who can see him.
@@ -196,6 +206,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
         TagAPI.instance = null;
         TagAPI.mainThread = null;
+        TagAPI.version = null;
     }
 
     /**
@@ -239,6 +250,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
 
         this.getLogger().info("Using hooks for CraftBukkit " + versionLoaded);
+        TagAPI.version = this.getDescription().getVersion();
 
         this.handler.startup();
         this.wasEnabled = true;
