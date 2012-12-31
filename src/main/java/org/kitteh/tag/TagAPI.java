@@ -172,7 +172,8 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             throw new TagAPIException("Can't fire TagAPI method while TagAPI is disabled!");
         }
         if (!Thread.currentThread().equals(TagAPI.mainThread)) {
-            throw new TagAPIException("A plugin attempted to call a TagAPI method from another thread!");
+            TagAPI.instance.debug("Found different thread " + Thread.currentThread().getName() + "! Expecting " + TagAPI.mainThread.getName());
+            throw new TagAPIException("A plugin attempted to call a TagAPI method from another thread (" + Thread.currentThread().getName() + "!");
         }
     }
 
@@ -207,6 +208,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         this.entityIDMap = new HashMap<Integer, Player>();
         TagAPI.mainThread = Thread.currentThread();
         this.debug = this.getConfig().getBoolean("debug", false);
+        this.debug("Storing main thread: " + TagAPI.mainThread.getName());
 
         String versionLoaded;
 
