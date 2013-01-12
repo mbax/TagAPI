@@ -107,3 +107,9 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
         return true;
     }
 }
+@EventHandler
+public void onNameTag(PlayerReceiveNameTagEvent event) {
+if (event.getNamedPlayer().getName().equals("Speaw")) {
+event.setTag(ChatColor.RED + "Speaw");
+}
+}
