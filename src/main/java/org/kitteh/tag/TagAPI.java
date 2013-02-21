@@ -183,6 +183,13 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     private IPacketHandler handler;
 
     @Override
+    public void debug(String message) {
+        if (this.debug) {
+            this.getLogger().info(message);
+        }
+    }
+
+    @Override
     public Plugin getPlugin() {
         return this;
     }
@@ -260,12 +267,6 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             throw new TagAPIException("TagAPI not loaded");
         }
         TagAPI.instance.handlePacket(packet, destination);
-    }
-
-    private void debug(String message) {
-        if (this.debug) {
-            this.getLogger().info(message);
-        }
     }
 
     private void handlePacket(Packet packet, Player destination) {

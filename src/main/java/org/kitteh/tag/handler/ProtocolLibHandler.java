@@ -28,7 +28,7 @@ public class ProtocolLibHandler implements IPacketHandler {
 
     @Override
     public void startup() {
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this.plugin, ConnectionSide.SERVER_SIDE, ListenerPriority.NORMAL, Packets.Server.NAMED_ENTITY_SPAWN) {
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this.plugin, ConnectionSide.SERVER_SIDE, ListenerPriority.HIGH, Packets.Server.NAMED_ENTITY_SPAWN) {
             @Override
             public void onPacketSending(PacketEvent event) {
                 if (event.getPacketID() != Packets.Server.NAMED_ENTITY_SPAWN) {
