@@ -28,7 +28,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.kitteh.tag.api.IPacketHandler;
-import org.kitteh.tag.api.Packet;
 import org.kitteh.tag.api.TagAPIException;
 import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.handler.ProtocolLibHandler;
@@ -262,22 +261,22 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     @Override
-    public void packet(Packet packet, Player destination) {
+    public String packet(int entityId, String playername, Player destination) {
         if (TagAPI.instance == null) {
             throw new TagAPIException("TagAPI not loaded");
         }
-        TagAPI.instance.handlePacket(packet, destination);
+        return TagAPI.instance.handlePacket(entityId, playername, destination);
     }
 
-    private void handlePacket(Packet packet, Player destination) {
-        final Player named = this.entityIDMap.get(packet.entityId);
+    private String handlePacket(int entityId, String playername, Player destination) {
+        final Player named = this.entityIDMap.get(entityId);
         if (named == null) {
-            this.debug("Could not find entity ID " + packet.entityId + ". Discarded.");
-            return;
+            this.debug("Could not find entity ID " + entityId + ". Discarded.");
+            return playername;
         }
         if (destination == null) {
             this.debug("Encountered a packet destined for an unknown player. Discarded.");
-            return;
+            return playername;
         }
         final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(destination, named);
         this.getServer().getPluginManager().callEvent(event);
@@ -286,8 +285,9 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             if (name.length() > 16) {
                 name = name.substring(0, 16);
             }
-            packet.tag = name;
+            playername = name;
         }
+        return playername;
     }
 
     private void in(Player player) {
