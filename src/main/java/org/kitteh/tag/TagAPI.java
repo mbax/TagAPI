@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -279,7 +281,26 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             return playername;
         }
         final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(destination, named);
-        this.getServer().getPluginManager().callEvent(event);
+        if (!Thread.currentThread().equals(TagAPI.mainThread)) {
+            final Future<Boolean> future = this.getServer().getScheduler().callSyncMethod(this, new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    TagAPI.this.getServer().getPluginManager().callEvent(event);
+                    return true;
+                }
+            });
+            while (!future.isCancelled() && !future.isDone()) {
+                try {
+                    Thread.sleep(1);
+                } catch (final InterruptedException e) {
+                }
+            }
+            if (future.isCancelled()) {
+                return playername;
+            }
+        } else {
+            this.getServer().getPluginManager().callEvent(event);
+        }
         if (event.isModified()) {
             String name = event.getTag();
             if (name.length() > 16) {
