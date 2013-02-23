@@ -55,6 +55,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         public void onPlayerQuit(PlayerQuitEvent event) {
             this.api.entityIDMap.remove(event.getPlayer().getEntityId());
         }
+
     }
 
     private class RefreshPair {
@@ -74,6 +75,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         public Player getTarget() {
             return this.target;
         }
+
     }
 
     private class ShowBomb implements Runnable {
@@ -94,6 +96,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                 }
             }
         }
+
     }
 
     private static TagAPI instance = null;
@@ -252,13 +255,16 @@ public class TagAPI extends JavaPlugin implements TagHandler {
 
         this.handler.startup();
         this.wasEnabled = true;
+
         this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
         for (final Player player : this.getServer().getOnlinePlayers()) {
             this.in(player);
         }
+
         try {
             new MetricsLite(this).start();
         } catch (final IOException e) {
+            // Whatever!
         }
     }
 

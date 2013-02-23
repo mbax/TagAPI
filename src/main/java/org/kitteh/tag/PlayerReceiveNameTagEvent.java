@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerEvent;
  * Catch this event in order to have an effect on the player's name tag
  */
 public class PlayerReceiveNameTagEvent extends PlayerEvent {
+
     private static final HandlerList handlers = new HandlerList();
 
     /**
@@ -106,4 +107,5 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
         }
         return true;
     }
+
 }

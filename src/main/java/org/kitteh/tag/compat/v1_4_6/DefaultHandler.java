@@ -40,4 +40,5 @@ public class DefaultHandler extends PacketHandler {
             packet.b = this.handler.packet(packet.a, packet.b, owner);
         }
     }
+
 }

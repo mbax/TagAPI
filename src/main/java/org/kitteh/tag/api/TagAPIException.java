@@ -21,6 +21,7 @@ package org.kitteh.tag.api;
  * and look foolish
  */
 public class TagAPIException extends RuntimeException {
+
     private static final long serialVersionUID = 1L;
 
     public TagAPIException(String message) {
@@ -30,4 +31,5 @@ public class TagAPIException extends RuntimeException {
     public TagAPIException(String message, Throwable throwable) {
         super(message, throwable);
     }
+
 }

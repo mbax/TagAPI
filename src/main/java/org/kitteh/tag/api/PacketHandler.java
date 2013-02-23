@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
 public abstract class PacketHandler implements IPacketHandler {
+
     public class ArrayLizt<E> implements List<E> {
 
         private final List<E> list;
@@ -169,11 +170,11 @@ public abstract class PacketHandler implements IPacketHandler {
         public void onPlayerJoin(PlayerJoinEvent event) {
             this.handler.hookPlayer(event.getPlayer());
         }
+
     }
 
-    protected final Plugin plugin;
-
     protected final TagHandler handler;
+    private final Plugin plugin;
     private final Map<Class<?>, Field> fieldMap = new HashMap<Class<?>, Field>();
 
     public PacketHandler(TagHandler handler) {
@@ -261,4 +262,5 @@ public abstract class PacketHandler implements IPacketHandler {
             this.plugin.getLogger().log(Level.WARNING, "Failed to restore " + player.getName() + ". Could be a problem.", e);
         }
     }
+
 }
