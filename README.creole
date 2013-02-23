@@ -1,18 +1,19 @@
 = TagAPI
-== Name all the tags!
 \\
 \\
+[[http://dev.bukkit.org/server-mods/tag/|BukkitDev page]]
 \\
 == Super easy instructions
 \\
-[[http://forums.bukkit.org/threads/tagapi-change-color-the-name-over-peoples-heads.99485/|Click here for a Bukkit forums post outlining how to use this.]]
+[[http://forums.bukkit.org/threads/99485/|Click here for a Bukkit forums post outlining how to use this.]]
 \\
 \\
-If you have any questions, you can contact me in #vanish on esper
+If you have any questions, visit #kitteh.org on esper (or click [[http://webchat.esper.net/?nick=Tag_...&channels=kitteh.org&prompt=0|here]] to join).
 \\
 \\
 =LICENSE
 Copyright 2012 Matt Baxter\\
+Metrics code Copyright 2011 Tyler Blair. All rights reserved.\\
 \\
 Licensed under the Apache License, Version 2.0 (the "License");\\
 you may not use this file except in compliance with the License.\\
