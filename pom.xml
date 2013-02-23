@@ -41,6 +41,34 @@
           <skip>true</skip>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>com.mycila.maven-license-plugin</groupId>
+        <artifactId>maven-license-plugin</artifactId>
+        <version>1.10.b1</version>
+        <executions>
+          <execution>
+            <phase>clean</phase>
+            <goals>
+              <goal>format</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <quiet>true</quiet>
+          <encoding>UTF-8</encoding>
+          <strictCheck>true</strictCheck>
+          <header>${basedir}/TagAPI-LICENSE</header>
+          <mapping>
+            <java>SLASHSTAR_STYLE</java>
+          </mapping>
+          <includes>
+            <include>src/main/java/org/kitteh/**</include>
+          </includes>
+          <excludes>
+            <exclude>src/main/java/org/kitteh/tag/metrics/**</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
