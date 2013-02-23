@@ -174,7 +174,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
         if (!Thread.currentThread().equals(TagAPI.mainThread)) {
             TagAPI.instance.debug("Found different thread " + Thread.currentThread().getName() + "! Expecting " + TagAPI.mainThread.getName());
-            throw new TagAPIException("A plugin attempted to call a TagAPI method from another thread (" + Thread.currentThread().getName() + "!");
+            throw new TagAPIException("A plugin attempted to call a TagAPI method from another thread (" + Thread.currentThread().getName() + ")!");
         }
     }
 
