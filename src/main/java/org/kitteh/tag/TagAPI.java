@@ -242,7 +242,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             versionLoaded = (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion);
         }
         if (this.handler == null) {
-            this.setEnabled(false);
+            this.getServer().getPluginManager().disablePlugin(this);
         }
         if (!this.getServer().getPluginManager().isPluginEnabled(this)) {
             return;
