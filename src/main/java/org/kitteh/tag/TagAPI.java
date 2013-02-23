@@ -296,6 +296,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                 }
             }
             if (future.isCancelled()) {
+                this.debug("Async task for " + playername + " was cancelled. Skipping.");
                 return playername;
             }
         } else {
