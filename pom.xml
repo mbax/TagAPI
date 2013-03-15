@@ -17,6 +17,7 @@
     <module>modules/v1_4_5</module>
     <module>modules/v1_4_6</module>
     <module>modules/v1_4_R1</module>
+    <module>modules/v1_5_R1</module>
     <module>modules/TagAPI</module>
   </modules>
 
@@ -71,5 +72,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
