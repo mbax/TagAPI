@@ -46,15 +46,34 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
      * TagAPI creates all the event objects for you.
      * 
      * @param who
-     *            The player who is receiving the nametag info
+     *            The player receiving the nametag info
      * @param named
      *            The player whose nametag we're talking about
+     * @deprecated
      */
+    @Deprecated
     public PlayerReceiveNameTagEvent(Player who, Player named) {
         super(who);
         this.modified = false;
         this.named = named;
         this.tag = named.getName();
+    }
+
+    /**
+     * TagAPI creates all the event objects for you.
+     * 
+     * @param who
+     *            The player receiving the nametag info
+     * @param named
+     *            The player whose nametag we're talking about
+     * @param initialName
+     *            Initial name tag
+     */
+    public PlayerReceiveNameTagEvent(Player who, Player named, String initialName) {
+        super(who);
+        this.modified = named.getName().equals(initialName);
+        this.named = named;
+        this.tag = initialName;
     }
 
     @Override

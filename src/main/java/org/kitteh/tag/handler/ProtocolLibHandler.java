@@ -50,7 +50,7 @@ public class ProtocolLibHandler implements IPacketHandler {
                 }
                 final PacketContainer packetContainer = event.getPacket();
                 try {
-                    final String newName = ProtocolLibHandler.this.plugin.packet(packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
+                    final String newName = ProtocolLibHandler.this.plugin.getNameForPacket20(packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
                     packetContainer.getSpecificModifier(String.class).write(0, newName);
                 } catch (final FieldAccessException e) {
                     e.printStackTrace();
