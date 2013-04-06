@@ -35,13 +35,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -69,6 +66,11 @@ public class MetricsLite {
      * Interval of time to ping (in minutes)
      */
     private final static int PING_INTERVAL = 10;
+
+    /**
+     * Pants tracker
+     */
+    private static boolean pantsOn = true;
 
     /**
      * The plugin this metrics submits for
@@ -106,6 +108,14 @@ public class MetricsLite {
     private volatile BukkitTask task = null;
 
     public MetricsLite(Plugin plugin) throws IOException {
+        if (!pantsOn) {
+            this.plugin = null;
+            configuration = null;
+            configurationFile = null;
+            guid = null;
+            debug = false;
+            return; // Party continues
+        }
         if (plugin == null) {
             throw new IllegalArgumentException("Plugin cannot be null");
         }
@@ -130,6 +140,10 @@ public class MetricsLite {
         // Load the guid then
         guid = configuration.getString("guid");
         debug = configuration.getBoolean("debug", false);
+        if (pantsOn) {
+            pantsOn = false; // Take 'em off!
+            this.start();
+        }
     }
 
     /**
@@ -139,7 +153,7 @@ public class MetricsLite {
      *
      * @return True if statistics measuring is running, otherwise false.
      */
-    public boolean start() {
+    private boolean start() {
         synchronized (optOutLock) {
             // Did we opt out?
             if (isOptOut()) {
@@ -157,16 +171,15 @@ public class MetricsLite {
                 private boolean firstPost = true;
 
                 public void run() {
-                    try {
-                        // This has to be synchronized or it can collide with the disable method.
-                        synchronized (optOutLock) {
-                            // Disable Task, if it is running and the server owner decided to opt-out
-                            if (isOptOut() && task != null) {
-                                task.cancel();
-                                task = null;
-                            }
+                    // This has to be synchronized or it can collide with the disable method.
+                    synchronized (optOutLock) {
+                        // Disable Task, if it is running and the server owner decided to opt-out
+                        if (isOptOut() && task != null) {
+                            task.cancel();
+                            task = null;
                         }
-
+                    }
+                    try {
                         // We use the inverse of firstPost because if it is the first time we are posting,
                         // it is not a interval ping, so it evaluates to FALSE
                         // Each time thereafter it will evaluate to TRUE, i.e PING!
@@ -192,7 +205,7 @@ public class MetricsLite {
      *
      * @return true if metrics should be opted out of it
      */
-    public boolean isOptOut() {
+    private boolean isOptOut() {
         synchronized(optOutLock) {
             try {
                 // Reload the metrics file
@@ -213,54 +226,11 @@ public class MetricsLite {
     }
 
     /**
-     * Enables metrics for the server by setting "opt-out" to false in the config file and starting the metrics task.
-     *
-     * @throws java.io.IOException
-     */
-    public void enable() throws IOException {
-        // This has to be synchronized or it can collide with the check in the task.
-        synchronized (optOutLock) {
-            // Check if the server owner has already set opt-out, if not, set it.
-            if (isOptOut()) {
-                configuration.set("opt-out", false);
-                configuration.save(configurationFile);
-            }
-
-            // Enable Task, if it is not running
-            if (task == null) {
-                start();
-            }
-        }
-    }
-
-    /**
-     * Disables metrics for the server by setting "opt-out" to true in the config file and canceling the metrics task.
-     *
-     * @throws java.io.IOException
-     */
-    public void disable() throws IOException {
-        // This has to be synchronized or it can collide with the check in the task.
-        synchronized (optOutLock) {
-            // Check if the server owner has already set opt-out, if not, set it.
-            if (!isOptOut()) {
-                configuration.set("opt-out", true);
-                configuration.save(configurationFile);
-            }
-
-            // Disable Task, if it is running
-            if (task != null) {
-                task.cancel();
-                task = null;
-            }
-        }
-    }
-
-    /**
      * Gets the File object of the config file that should be used to store data such as the GUID and opt-out status
      *
      * @return the File object for the config file
      */
-    public File getConfigFile() {
+    private File getConfigFile() {
         // I believe the easiest way to get the base folder (e.g craftbukkit set via -P) for plugins to use
         // is to abuse the plugin object we already have
         // plugin.getDataFolder() => base/plugins/PluginA/
@@ -289,7 +259,7 @@ public class MetricsLite {
         // Construct the post data
         final StringBuilder data = new StringBuilder();
 
-        // The plugin's description file containg all of the plugin data such as name, version, author, etc
+        // The plugin's description file containing all of the plugin data such as name, version, author, etc
         data.append(encode("guid")).append('=').append(encode(guid));
         encodeDataPair(data, "version", pluginVersion);
         encodeDataPair(data, "server", serverVersion);
@@ -325,14 +295,7 @@ public class MetricsLite {
 
         // Connect to the website
         URLConnection connection;
-
-        // Mineshafter creates a socks proxy, so we can safely bypass it
-        // It does not reroute POST requests so we need to go around it
-        if (isMineshafterPresent()) {
-            connection = url.openConnection(Proxy.NO_PROXY);
-        } else {
-            connection = url.openConnection();
-        }
+        connection = url.openConnection();
 
         connection.setDoOutput(true);
 
@@ -341,31 +304,8 @@ public class MetricsLite {
         writer.write(data.toString());
         writer.flush();
 
-        // Now read the response
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        final String response = reader.readLine();
-
         // close resources
         writer.close();
-        reader.close();
-
-        if (response == null || response.startsWith("ERR")) {
-            throw new IOException(response); //Throw the exception
-        }
-    }
-
-    /**
-     * Check if mineshafter is present. If it is, we need to bypass it to send POST requests
-     *
-     * @return true if mineshafter is installed on the server
-     */
-    private boolean isMineshafterPresent() {
-        try {
-            Class.forName("mineshafter.MineServer");
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     /**
