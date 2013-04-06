@@ -52,7 +52,7 @@ public class DefaultHandler extends PacketHandler {
     protected void handlePacketAdd(Object o, Player owner) {
         if (o instanceof Packet20NamedEntitySpawn) {
             final Packet20NamedEntitySpawn packet = ((Packet20NamedEntitySpawn) o);
-            packet.b = this.handler.packet(packet.a, packet.b, owner);;
+            packet.b = this.handler.getNameForPacket20(packet.a, packet.b, owner);;
         }
     }
 

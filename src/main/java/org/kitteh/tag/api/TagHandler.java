@@ -22,7 +22,7 @@ public interface TagHandler {
 
     public void debug(String message);
 
-    public String packet(int entityId, String playername, Player destination);
+    public String getNameForPacket20(int entityID, String initialName, Player destination);
 
     public Plugin getPlugin();
 

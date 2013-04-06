@@ -195,6 +195,16 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     @Override
+    public String getNameForPacket20(int entityID, String initialName, Player destination) {
+        Player named = this.getPlayer(entityID);
+        if (named != null) {
+            return this.getName(named, initialName, destination);
+        } else {
+            return initialName;
+        }
+    }
+
+    @Override
     public Plugin getPlugin() {
         return this;
     }
@@ -263,22 +273,13 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
     }
 
-    @Override
-    public String packet(int entityId, String playername, Player destination) {
-        return this.handlePacket(entityId, playername, destination);
-    }
-
-    private String handlePacket(int entityId, String playername, Player destination) {
-        final Player named = this.entityIDMap.get(entityId);
-        if (named == null) {
-            this.debug("Could not find entity ID " + entityId + ". Discarded.");
-            return playername;
-        }
+    private String getName(Player named, String initialName, Player destination) {
+        String playername = initialName;
         if (destination == null) {
             this.debug("Encountered a packet destined for an unknown player. Discarded.");
             return playername;
         }
-        final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(destination, named);
+        final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(destination, named, playername);
         if (!Thread.currentThread().equals(TagAPI.mainThread)) {
             final Future<Boolean> future = this.getServer().getScheduler().callSyncMethod(this, new Callable<Boolean>() {
                 @Override
@@ -294,20 +295,27 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                 }
             }
             if (future.isCancelled()) {
-                this.debug("Async task for " + playername + " was cancelled. Skipping.");
+                this.debug("Async task for tag of " + named.getName() + " to " + destination.getName() + " was cancelled. Skipping.");
                 return playername;
             }
         } else {
             this.getServer().getPluginManager().callEvent(event);
         }
-        if (event.isModified()) {
-            String name = event.getTag();
-            if (name.length() > 16) {
-                name = name.substring(0, 16);
-            }
-            playername = name;
+        String name = event.getTag();
+        if (name.length() > 16) {
+            name = name.substring(0, 16);
         }
+        playername = name;
         return playername;
+    }
+
+    private Player getPlayer(int entityId) {
+        final Player named = this.entityIDMap.get(entityId);
+        if (named == null) {
+            this.debug("Could not find entity ID " + entityId + ". Discarded.");
+            return null;
+        }
+        return named;
     }
 
     private void in(Player player) {
