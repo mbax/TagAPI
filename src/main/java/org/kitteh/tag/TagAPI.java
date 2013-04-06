@@ -257,7 +257,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
 
         try {
-            new MetricsLite(this).start();
+            new MetricsLite(this);
         } catch (final IOException e) {
             // Whatever!
         }
