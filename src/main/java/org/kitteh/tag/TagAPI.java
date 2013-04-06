@@ -199,9 +199,6 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         return this;
     }
 
-    /**
-     * @see org.bukkit.plugin.java.JavaPlugin#onDisable()
-     */
     @Override
     public void onDisable() {
         if (this.wasEnabled) {
@@ -211,9 +208,6 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         TagAPI.mainThread = null;
     }
 
-    /**
-     * @see org.bukkit.plugin.java.JavaPlugin#onEnable()
-     */
     @Override
     public void onEnable() {
         TagAPI.instance = this;
