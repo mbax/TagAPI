@@ -271,10 +271,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
 
     @Override
     public String packet(int entityId, String playername, Player destination) {
-        if (TagAPI.instance == null) {
-            throw new TagAPIException("TagAPI not loaded");
-        }
-        return TagAPI.instance.handlePacket(entityId, playername, destination);
+        return this.handlePacket(entityId, playername, destination);
     }
 
     private String handlePacket(int entityId, String playername, Player destination) {
