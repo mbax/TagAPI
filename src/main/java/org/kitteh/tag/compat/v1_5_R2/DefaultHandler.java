@@ -15,6 +15,7 @@
  */
 package org.kitteh.tag.compat.v1_5_R2;
 
+import net.minecraft.server.v1_5_R2.Packet207SetScoreboardScore;
 import net.minecraft.server.v1_5_R2.Packet20NamedEntitySpawn;
 
 import org.bukkit.craftbukkit.v1_5_R2.entity.CraftPlayer;
@@ -53,6 +54,9 @@ public class DefaultHandler extends PacketHandler {
         if (o instanceof Packet20NamedEntitySpawn) {
             final Packet20NamedEntitySpawn packet = ((Packet20NamedEntitySpawn) o);
             packet.b = this.handler.getNameForPacket20(packet.a, packet.b, owner);
+        } else if (o instanceof Packet207SetScoreboardScore) {
+            final Packet207SetScoreboardScore packet = ((Packet207SetScoreboardScore) o);
+            packet.a = this.handler.getNameForPacket207(packet.a, packet.b, owner);
         }
     }
 
