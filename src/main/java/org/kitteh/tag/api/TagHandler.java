@@ -24,6 +24,8 @@ public interface TagHandler {
 
     public String getNameForPacket20(int entityID, String initialName, Player destination);
 
+    public String getNameForPacket207(String playerName, String objectiveName, Player destination);
+
     public Plugin getPlugin();
 
 }

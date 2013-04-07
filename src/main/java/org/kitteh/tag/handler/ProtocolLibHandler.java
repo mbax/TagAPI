@@ -42,18 +42,25 @@ public class ProtocolLibHandler implements IPacketHandler {
 
     @Override
     public void startup() {
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this.plugin, ConnectionSide.SERVER_SIDE, ListenerPriority.HIGH, Packets.Server.NAMED_ENTITY_SPAWN) {
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this.plugin, ConnectionSide.SERVER_SIDE, ListenerPriority.HIGH, Packets.Server.NAMED_ENTITY_SPAWN, 207) {
             @Override
             public void onPacketSending(PacketEvent event) {
-                if (event.getPacketID() != Packets.Server.NAMED_ENTITY_SPAWN) {
-                    return;
-                }
-                final PacketContainer packetContainer = event.getPacket();
-                try {
-                    final String newName = ProtocolLibHandler.this.plugin.getNameForPacket20(packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
-                    packetContainer.getSpecificModifier(String.class).write(0, newName);
-                } catch (final FieldAccessException e) {
-                    e.printStackTrace();
+                if (event.getPacketID() == Packets.Server.NAMED_ENTITY_SPAWN) {
+                    final PacketContainer packetContainer = event.getPacket();
+                    try {
+                        final String newName = ProtocolLibHandler.this.plugin.getNameForPacket20(packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
+                        packetContainer.getSpecificModifier(String.class).write(0, newName);
+                    } catch (final FieldAccessException e) {
+                        e.printStackTrace();
+                    }
+                } else if (event.getPacketID() == 207) {
+                    final PacketContainer packetContainer = event.getPacket();
+                    try {
+                        final String newName = ProtocolLibHandler.this.plugin.getNameForPacket207(packetContainer.getSpecificModifier(String.class).read(0), packetContainer.getSpecificModifier(String.class).read(1), event.getPlayer());
+                        packetContainer.getSpecificModifier(String.class).write(0, newName);
+                    } catch (final FieldAccessException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });

@@ -30,6 +30,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
 import org.kitteh.tag.api.IPacketHandler;
 import org.kitteh.tag.api.TagAPIException;
 import org.kitteh.tag.api.TagHandler;
@@ -196,12 +198,32 @@ public class TagAPI extends JavaPlugin implements TagHandler {
 
     @Override
     public String getNameForPacket20(int entityID, String initialName, Player destination) {
-        Player named = this.getPlayer(entityID);
+        final Player named = this.getPlayer(entityID);
         if (named != null) {
             return this.getName(named, initialName, destination);
         } else {
             return initialName;
         }
+    }
+
+    @Override
+    public String getNameForPacket207(String playerName, String objectiveName, Player destination) {
+        if (destination == null) {
+            this.debug("Encountered a scoreboard packet destined for an unknown player. Discarded.");
+            return playerName;
+        }
+        final Objective objective = destination.getScoreboard().getObjective(objectiveName);
+        if (objective == null) {
+            this.debug("Encountered an objective name that does not appear registered. Discarded.");
+            return playerName;
+        }
+        if (objective.getDisplaySlot() == DisplaySlot.BELOW_NAME) {
+            final Player named = this.getServer().getPlayerExact(playerName);
+            if (named != null) {
+                return this.getName(named, playerName, destination);
+            }
+        }
+        return playerName;
     }
 
     @Override
@@ -234,10 +256,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             versionLoaded = "via ProtocolLib";
         } else {
             final String packageName = this.getServer().getClass().getPackage().getName();
-            String cbversion = packageName.substring(packageName.lastIndexOf('.') + 1);
-            if (cbversion.equals("craftbukkit")) {
-                cbversion = "pre";
-            }
+            final String cbversion = packageName.substring(packageName.lastIndexOf('.') + 1);
             try {
                 final Class<?> clazz = Class.forName("org.kitteh.tag.compat." + cbversion + ".DefaultHandler");
                 if (IPacketHandler.class.isAssignableFrom(clazz)) {
@@ -247,7 +266,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                 this.getLogger().severe("Could not find support for this CraftBukkit version. Check for an update or pester mbaxter.");
                 this.getLogger().info("Update hopefully available at http://dev.bukkit.org/server-mods/tag");
             }
-            versionLoaded = (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion);
+            versionLoaded = cbversion;
         }
         if (this.handler == null) {
             this.getServer().getPluginManager().disablePlugin(this);
