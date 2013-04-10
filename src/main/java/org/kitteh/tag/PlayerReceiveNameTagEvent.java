@@ -54,6 +54,8 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
     @Deprecated
     public PlayerReceiveNameTagEvent(Player who, Player named) {
         super(who);
+        Validate.notNull(who, "Destination player cannot be null!");
+        Validate.notNull(named, "Named player cannot be null!");
         this.modified = false;
         this.named = named;
         this.tag = named.getName();
@@ -71,6 +73,9 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
      */
     public PlayerReceiveNameTagEvent(Player who, Player named, String initialName) {
         super(who);
+        Validate.notNull(who, "Destination player cannot be null!");
+        Validate.notNull(named, "Named player cannot be null!");
+        Validate.notNull(initialName, "Initial player name cannot be null!");
         this.modified = named.getName().equals(initialName);
         this.named = named;
         this.tag = initialName;
