@@ -49,6 +49,7 @@
       <artifactId>bukkit</artifactId>
       <version>1.5.1-R0.2</version>
       <type>jar</type>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.comphenix.protocol</groupId>
