@@ -23,14 +23,16 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>craftbukkit</artifactId>
-      <version>1.4.7-R0.1</version>
+      <version>1.4.7-R1.0</version>
       <type>jar</type>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.kitteh</groupId>
       <artifactId>tagapi-api</artifactId>
       <version>API</version>
       <type>jar</type>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 
