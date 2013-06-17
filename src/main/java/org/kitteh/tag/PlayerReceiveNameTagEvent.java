@@ -124,6 +124,9 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
      */
     public boolean setTag(String tag) {
         Validate.notNull(tag, "New nametag cannot be null!");
+        if (this.tag.equals(tag)) {
+            return true;
+        }
         this.tag = tag;
         this.modified = true;
         if (tag.length() > 16) {
