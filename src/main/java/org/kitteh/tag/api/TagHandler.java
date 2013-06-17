@@ -17,12 +17,15 @@ package org.kitteh.tag.api;
 
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.kitteh.tag.EntityNameResult;
 
 public interface TagHandler {
 
     public void debug(String message);
 
     public String getNameForPacket20(int entityID, String initialName, Player destination);
+
+    public EntityNameResult getNameForEntity(int entityID, Player destination);
 
     public Plugin getPlugin();
 

@@ -18,10 +18,14 @@ package org.kitteh.tag;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -186,6 +190,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     private boolean wasEnabled;
     private HashMap<Integer, Player> entityIDMap;
     private IPacketHandler handler;
+    private final Map<Integer, LivingEntity> entityTempMap = new HashMap<Integer, LivingEntity>();
 
     @Override
     public void debug(String message) {
@@ -195,8 +200,49 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     @Override
+    public EntityNameResult getNameForEntity(final int entityID, final Player destination) {
+        final Callable<EntityNameResult> callable = new Callable<EntityNameResult>() {
+            @Override
+            public EntityNameResult call() throws Exception {
+                final LivingEntity entity = TagAPI.this.getEntity(entityID, destination.getWorld());
+                if (entity == null) {
+                    // Debug removed because it picks up non-LivingEntity entities as null
+                    //TagAPI.this.debug("Could not find Entity with ID " + entityID + ". Skipping.");
+                    return null;
+                }
+                final String initialName = entity.getCustomName() != null ? entity.getCustomName() : "";
+                final PlayerReceiveEntityNameTagEvent event = new PlayerReceiveEntityNameTagEvent(destination, entity, initialName, entity.isCustomNameVisible());
+                TagAPI.this.getServer().getPluginManager().callEvent(event);
+                return new EntityNameResult(event.getTag(), event.isTagVisible(), event.isTagModified(), event.isVisibleModified());
+            }
+        };
+        if (!Thread.currentThread().equals(TagAPI.mainThread)) {
+            final Future<EntityNameResult> future = this.getServer().getScheduler().callSyncMethod(this, callable);
+            while (!future.isCancelled() && !future.isDone()) {
+                try {
+                    Thread.sleep(1);
+                } catch (final InterruptedException e) {
+                }
+            }
+            if (future.isCancelled()) {
+                this.debug("Async task for tag of entity " + entityID + " to " + destination.getName() + " was cancelled.");
+            }
+            try {
+                return future.get();
+            } catch (final Exception e) {
+            }
+        } else {
+            try {
+                return callable.call();
+            } catch (final Exception e) {
+            }
+        }
+        return null;
+    }
+
+    @Override
     public String getNameForPacket20(int entityID, String initialName, Player destination) {
-        Player named = this.getPlayer(entityID);
+        final Player named = this.getPlayer(entityID);
         if (named != null) {
             return this.getName(named, initialName, destination);
         } else {
@@ -261,6 +307,13 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         this.handler.startup();
         this.wasEnabled = true;
 
+        this.getServer().getScheduler().runTaskTimer(this, new Runnable() {
+            @Override
+            public void run() {
+                TagAPI.this.entityTempMap.clear();
+            }
+        }, 20, 20);
+
         this.getServer().getPluginManager().registerEvents(new HeyListen(this), this);
         for (final Player player : this.getServer().getOnlinePlayers()) {
             this.in(player);
@@ -271,6 +324,37 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         } catch (final IOException e) {
             // Whatever!
         }
+    }
+
+    private LivingEntity getEntity(int entityID, World start) {
+        LivingEntity entity = this.entityTempMap.get(entityID);
+        if (entity != null) {
+            return entity;
+        }
+        entity = this.getEntityFromWorld(entityID, start);
+        if (entity == null) {
+            for (final World world : this.getServer().getWorlds()) {
+                if (world.equals(start)) {
+                    continue;
+                }
+                if ((entity = this.getEntityFromWorld(entityID, world)) != null) {
+                    break;
+                }
+            }
+        }
+        if (entity != null) {
+            this.entityTempMap.put(entityID, entity);
+        }
+        return entity;
+    }
+
+    private LivingEntity getEntityFromWorld(int entityID, World world) {
+        for (final Entity e : world.getEntities()) {
+            if (e.getEntityId() == entityID) {
+                return (LivingEntity) (e instanceof LivingEntity ? e : null);
+            }
+        }
+        return null;
     }
 
     private String getName(Player named, String initialName, Player destination) {
@@ -321,5 +405,4 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     private void in(Player player) {
         this.entityIDMap.put(player.getEntityId(), player);
     }
-
 }
