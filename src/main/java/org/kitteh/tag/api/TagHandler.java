@@ -15,6 +15,8 @@
  */
 package org.kitteh.tag.api;
 
+import java.util.Collection;
+
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -25,6 +27,8 @@ public interface TagHandler {
     public String getNameForPacket20(int entityID, String initialName, Player destination);
 
     public String getNameForPacket207(String playerName, String objectiveName, Player destination);
+
+    public Collection<?> getNamesForPacket209(String teamName, boolean deletion, Collection<?> names, Player destination);
 
     public Plugin getPlugin();
 

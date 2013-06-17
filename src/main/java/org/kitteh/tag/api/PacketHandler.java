@@ -45,30 +45,41 @@ public abstract class PacketHandler implements IPacketHandler {
 
         @Override
         public boolean add(E packet) {
-            PacketHandler.this.handlePacketAdd(packet, this.owner);
-            return this.list.add(packet);
+            if (PacketHandler.this.handlePacketAdd(packet, this.owner)) {
+                return this.list.add(packet);
+            }
+            return false;
         }
 
         @Override
         public void add(int index, E packet) {
-            PacketHandler.this.handlePacketAdd(packet, this.owner);
-            this.list.add(index, packet);
+            if (PacketHandler.this.handlePacketAdd(packet, this.owner)) {
+                this.list.add(index, packet);
+            }
         }
 
         @Override
         public boolean addAll(Collection<? extends E> packetPile) {
+            boolean changed = false;
             for (final E packet : packetPile) {
-                PacketHandler.this.handlePacketAdd(packet, this.owner);
+                if (PacketHandler.this.handlePacketAdd(packet, this.owner)) {
+                    this.list.add(packet);
+                    changed = true;
+                }
             }
-            return this.list.addAll(packetPile);
+            return changed;
         }
 
         @Override
         public boolean addAll(int index, Collection<? extends E> packetPile) {
+            boolean changed = false;
             for (final E packet : packetPile) {
-                PacketHandler.this.handlePacketAdd(packet, this.owner);
+                if (PacketHandler.this.handlePacketAdd(packet, this.owner)) {
+                    this.list.add(index++, packet);
+                    changed = true;
+                }
             }
-            return this.list.addAll(index, packetPile);
+            return changed;
         }
 
         @Override
@@ -147,8 +158,10 @@ public abstract class PacketHandler implements IPacketHandler {
 
         @Override
         public E set(int index, E packet) {
-            PacketHandler.this.handlePacketAdd(packet, this.owner);
-            return this.list.set(index, packet);
+            if (PacketHandler.this.handlePacketAdd(packet, this.owner)) {
+                return this.list.set(index, packet);
+            }
+            return packet;
         }
 
         @Override
@@ -229,7 +242,7 @@ public abstract class PacketHandler implements IPacketHandler {
 
     protected abstract String getVersion();
 
-    protected abstract void handlePacketAdd(Object o, Player owner);
+    protected abstract boolean handlePacketAdd(Object o, Player owner);
 
     protected void hookPlayer(Player player) {
         try {

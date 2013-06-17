@@ -15,6 +15,7 @@
  */
 package org.kitteh.tag.compat.v1_5_R3;
 
+import net.minecraft.server.v1_5_R3.Packet209SetScoreboardTeam;
 import net.minecraft.server.v1_5_R3.Packet207SetScoreboardScore;
 import net.minecraft.server.v1_5_R3.Packet20NamedEntitySpawn;
 
@@ -50,14 +51,43 @@ public class DefaultHandler extends PacketHandler {
     }
 
     @Override
-    protected void handlePacketAdd(Object o, Player owner) {
+    protected boolean handlePacketAdd(Object o, Player owner) {
         if (o instanceof Packet20NamedEntitySpawn) {
             final Packet20NamedEntitySpawn packet = ((Packet20NamedEntitySpawn) o);
+            String name = packet.b;
             packet.b = this.handler.getNameForPacket20(packet.a, packet.b, owner);
+            org.bukkit.Bukkit.broadcastMessage("Telling " + owner.getName() + " that " + name + " is " + packet.b);
         } else if (o instanceof Packet207SetScoreboardScore) {
             final Packet207SetScoreboardScore packet = ((Packet207SetScoreboardScore) o);
             packet.a = this.handler.getNameForPacket207(packet.a, packet.b, owner);
+        } else if (o instanceof Packet209SetScoreboardTeam) {
+            final Packet209SetScoreboardTeam packet = ((Packet209SetScoreboardTeam) o);
+            System.out.println("Packet for "+owner.getName());
+            if (packet.e != null) {
+                packet.e = this.handler.getNamesForPacket209(packet.a, packet.f == 4, packet.e, owner);
+            } else {
+                return true;
+            }
+            if (packet.e == null) {
+                return false;
+            }
+            String m;
+            switch (packet.f) {
+                case 0:
+                    m = "created";
+                    break;
+                case 3:
+                    m = "add";
+                    break;
+                case 4:
+                    m = "remove";
+                    break;
+                default:
+                    m = "other";
+            }
+            org.bukkit.Bukkit.broadcastMessage("Sending " + m + " to " + owner.getName());
+            org.bukkit.Bukkit.broadcastMessage(packet.e.toString());
         }
+        return true;
     }
-
 }

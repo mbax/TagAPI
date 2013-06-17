@@ -17,11 +17,18 @@ package org.kitteh.tag;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -32,6 +39,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Team;
 import org.kitteh.tag.api.IPacketHandler;
 import org.kitteh.tag.api.TagAPIException;
 import org.kitteh.tag.api.TagHandler;
@@ -55,8 +63,31 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
 
         @EventHandler(priority = EventPriority.MONITOR)
+        public void onPlayerJoinLater(PlayerJoinEvent event) {
+            for (Team team : event.getPlayer().getScoreboard().getTeams()) {
+                Set<String> newNames = new HashSet<String>();
+                for (OfflinePlayer player : team.getPlayers()) {
+                    if (player instanceof Player) {
+                        String newName = getName((Player) player, player.getName(), event.getPlayer());
+                        if (!player.getName().equals(newName)) {
+                            newNames.add(newName);
+                        }
+                    }
+                }
+                if (newNames.size() > 0) {
+                    teamUpdates = newNames;
+                    System.out.println("Storing names: " + newNames.toString() + " for team " + team.getName() + " to show to " + event.getPlayer().getName());
+                    team.addPlayer(getServer().getOfflinePlayer(String.valueOf(ChatColor.COLOR_CHAR)));
+                    System.out.println("Hurp");
+                    teamUpdates = null;
+                }
+            }
+        }
+
+        @EventHandler(priority = EventPriority.MONITOR)
         public void onPlayerQuit(PlayerQuitEvent event) {
             this.api.entityIDMap.remove(event.getPlayer().getEntityId());
+            this.api.playerMap.remove(event.getPlayer().getName());
         }
 
     }
@@ -186,8 +217,10 @@ public class TagAPI extends JavaPlugin implements TagHandler {
 
     private boolean debug;
     private boolean wasEnabled;
-    private HashMap<Integer, Player> entityIDMap;
+    private Map<Integer, Player> entityIDMap;
     private IPacketHandler handler;
+    private Map<String, Plr> playerMap;
+    private Set<String> teamUpdates = null;
 
     @Override
     public void debug(String message) {
@@ -197,33 +230,121 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     @Override
-    public String getNameForPacket20(int entityID, String initialName, Player destination) {
-        final Player named = this.getPlayer(entityID);
-        if (named != null) {
-            return this.getName(named, initialName, destination);
-        } else {
-            return initialName;
-        }
+    public String getNameForPacket20(final int entityID, final String initialName, final Player destination) {
+        return this.call(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                final Player named = TagAPI.this.getPlayer(entityID);
+                if (named != null) {
+                    final Plr namedPlr = TagAPI.this.playerMap.get(named.getName());
+                    final Plr destPlr = TagAPI.this.playerMap.get(destination.getName());
+                    final String oldName = destPlr.getName(namedPlr);
+                    final String newName = TagAPI.this.getName(named, initialName, destination);
+                    if (!newName.equals(oldName)) {
+                        // For now, not sending a score update, instead waiting on value to change once
+                        for (final Team team : destination.getScoreboard().getTeams()) {
+                            if (team.hasPlayer(named)) {
+                                team.addPlayer(getServer().getOfflinePlayer(newName));
+                            }
+                        }
+                    }
+                    return newName;
+                } else {
+                    return initialName;
+                }
+            }
+        });
     }
 
     @Override
-    public String getNameForPacket207(String playerName, String objectiveName, Player destination) {
+    public String getNameForPacket207(final String playerName, final String objectiveName, final Player destination) {
         if (destination == null) {
             this.debug("Encountered a scoreboard packet destined for an unknown player. Discarded.");
             return playerName;
         }
-        final Objective objective = destination.getScoreboard().getObjective(objectiveName);
-        if (objective == null) {
-            this.debug("Encountered an objective name that does not appear registered. Discarded.");
-            return playerName;
-        }
-        if (objective.getDisplaySlot() == DisplaySlot.BELOW_NAME) {
-            final Player named = this.getServer().getPlayerExact(playerName);
-            if (named != null) {
-                return this.getName(named, playerName, destination);
+        return this.call(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                final Objective objective = destination.getScoreboard().getObjective(objectiveName);
+                if (objective == null) {
+                    TagAPI.this.debug("Encountered an objective name that does not appear registered. Discarded.");
+                    return playerName;
+                }
+                if (objective.getDisplaySlot() == DisplaySlot.BELOW_NAME) {
+                    final Player named = TagAPI.this.getServer().getPlayerExact(playerName);
+                    if (named != null) {
+                        String newName = TagAPI.this.playerMap.get(destination.getName()).getName(TagAPI.this.playerMap.get(named.getName()));
+                        if (newName == null) {
+                            newName = TagAPI.this.getName(named, playerName, destination);
+                        }
+                        return newName;
+                    }
+                }
+                return playerName;
             }
+
+        });
+    }
+
+    @Override
+    public Collection<?> getNamesForPacket209(final String teamName, final boolean deletion, final Collection<?> names, final Player destination) {
+        if (names.size() == 0) {
+            return names;
         }
-        return playerName;
+        return this.call(new Callable<Collection<?>>() {
+            @Override
+            public Collection<?> call() throws Exception {
+                final Set<String> newNames = new HashSet<String>();
+                final Iterator<?> iterator = names.iterator();
+                while (iterator.hasNext()) {
+                    final String playerName = iterator.next().toString();
+                    if (playerName.equals(String.valueOf(ChatColor.COLOR_CHAR))) {
+                        if (teamUpdates != null) {
+                            System.out.println("sending for " + destination.getName());
+                            newNames.addAll(teamUpdates);
+                        } else {
+                            System.out.println("cancelling for " + destination.getName());
+                            return null;
+                        }
+                    } else {
+                        newNames.add(playerName);
+                        final Player named = TagAPI.this.getServer().getPlayerExact(playerName);
+                        if (named != null) {
+                            String newName = TagAPI.this.playerMap.get(destination.getName()).getName(TagAPI.this.playerMap.get(named.getName()));
+                            if (newName == null) {
+                                newName = TagAPI.this.getName(named, playerName, destination);
+                            }
+                            newNames.add(newName);
+                        }
+                    }
+                }
+                /* There are too many... problems... with deletions
+                 * Leaving this bug for now.
+                if (deletion) { // Protect names still on the list
+                    Set<String> keep = new HashSet<String>();
+                    for (OfflinePlayer player : destination.getScoreboard().getTeam(teamName).getPlayers()) {
+                        if (names.contains(player.getName())) {
+                            continue;
+                        }
+                        String newName = TagAPI.this.playerMap.get(destination.getName()).getName(TagAPI.this.playerMap.get(player.getName()));
+                        if (newName == null && player instanceof Player) {
+                            newName = TagAPI.this.getName((Player) player, player.getName(), destination);
+                        }
+                        if(names.contains(player.getName()))
+                        if (newName != null) {
+                            keep.add(newName);
+                        }
+                        keep.add(player.getName());
+                    }
+                    newNames.removeAll(keep);
+                    if (newNames.size() == 0) {
+                        return null;
+                    }
+                }
+                */
+                return newNames;
+            }
+        });
     }
 
     @Override
@@ -243,7 +364,8 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     @Override
     public void onEnable() {
         TagAPI.instance = this;
-        this.entityIDMap = new HashMap<Integer, Player>();
+        this.entityIDMap = new ConcurrentHashMap<Integer, Player>();
+        this.playerMap = new ConcurrentHashMap<String, Plr>();
         TagAPI.mainThread = Thread.currentThread();
         this.debug = this.getConfig().getBoolean("debug", false);
         this.debug("Storing main thread: " + TagAPI.mainThread.getName());
@@ -300,20 +422,14 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
         final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(destination, named, playername);
         if (!Thread.currentThread().equals(TagAPI.mainThread)) {
-            final Future<Boolean> future = this.getServer().getScheduler().callSyncMethod(this, new Callable<Boolean>() {
+            Boolean ret = this.call(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
                     TagAPI.this.getServer().getPluginManager().callEvent(event);
                     return true;
                 }
             });
-            while (!future.isCancelled() && !future.isDone()) {
-                try {
-                    Thread.sleep(1);
-                } catch (final InterruptedException e) {
-                }
-            }
-            if (future.isCancelled()) {
+            if (ret == null) {
                 this.debug("Async task for tag of " + named.getName() + " to " + destination.getName() + " was cancelled. Skipping.");
                 return playername;
             }
@@ -325,7 +441,34 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             name = name.substring(0, 16);
         }
         playername = name;
+        this.playerMap.get(destination.getName()).setName(this.playerMap.get(named.getName()), playername);
         return playername;
+    }
+
+    private <T> T call(Callable<T> call) {
+        if (!Thread.currentThread().equals(TagAPI.mainThread)) {
+            final Future<T> future = this.getServer().getScheduler().callSyncMethod(this, call);
+            while (!future.isCancelled() && !future.isDone()) {
+                try {
+                    Thread.sleep(1);
+                } catch (final InterruptedException e) {
+                }
+            }
+            if (future.isCancelled()) {
+                return null;
+            }
+            try {
+                return future.get();
+            } catch (InterruptedException e) {
+            } catch (ExecutionException e) {
+            }
+            return null;
+        }
+        try {
+            return call.call();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private Player getPlayer(int entityId) {
@@ -339,6 +482,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
 
     private void in(Player player) {
         this.entityIDMap.put(player.getEntityId(), player);
+        this.playerMap.put(player.getName(), new Plr(player.getName()));
     }
 
 }
