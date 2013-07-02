@@ -74,6 +74,13 @@
     </dependency>
     <dependency>
       <groupId>org.kitteh</groupId>
+      <artifactId>tagapi-v1_6_R1</artifactId>
+      <version>v1_6_R1</version>
+      <type>jar</type>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.kitteh</groupId>
       <artifactId>tagapi-api</artifactId>
       <version>API</version>
       <type>jar</type>
