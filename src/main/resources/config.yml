@@ -1,0 +1,20 @@
+#
+#     TagAPI
+#
+#
+#  All options in here are ADVANCED STUFF
+#
+#
+# debug
+#   If true, will output debug messages relating to name tags.
+#   Don't use unless asked, or bored.
+#
+# asyncTickCheckPeriod
+#   Measured in milliseconds, this value determines how long TagAPI waits on the main thread from an asynchronous thread.
+#   Normally, this isn't even needed, but some plugins and server mods queue packets from other threads.
+#   Default value is 5. 
+#   If you have actually done CPU profiling and know that it's still an issue, try a higher value.
+#   Max value is 50, since that's the length of a 20tps tick.
+#
+debug: false
+asyncTickCheckPeriod: 5

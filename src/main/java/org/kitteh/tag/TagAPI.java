@@ -183,6 +183,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     private boolean debug;
+    private int tickPeriod;
     private boolean wasEnabled;
     private HashMap<Integer, Player> entityIDMap;
     private IPacketHandler handler;
@@ -223,7 +224,15 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         TagAPI.instance = this;
         this.entityIDMap = new HashMap<Integer, Player>();
         TagAPI.mainThread = Thread.currentThread();
+        this.saveDefaultConfig();
         this.debug = this.getConfig().getBoolean("debug", false);
+        int tickPeriod = this.getConfig().getInt("asyncTickCheckPeriod", 5);
+        if (tickPeriod > 50) {
+            tickPeriod = 50;
+        } else if (tickPeriod < 1) {
+            tickPeriod = 1;
+        }
+        this.tickPeriod = tickPeriod;
         this.debug("Storing main thread: " + TagAPI.mainThread.getName());
 
         String versionLoaded;
@@ -290,7 +299,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             });
             while (!future.isCancelled() && !future.isDone()) {
                 try {
-                    Thread.sleep(1);
+                    Thread.sleep(TagAPI.this.tickPeriod);
                 } catch (final InterruptedException e) {
                 }
             }
