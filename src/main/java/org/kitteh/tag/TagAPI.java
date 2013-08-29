@@ -253,7 +253,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                     this.handler = (IPacketHandler) clazz.getConstructor(TagHandler.class).newInstance(this);
                 }
             } catch (final Exception e) {
-                this.getLogger().severe("Could not find support for this CraftBukkit version. Check for an update or pester mbaxter.");
+                this.getLogger().severe("Could not find support for this " + this.getServer().getName() + " version. Check for an update or pester mbaxter.");
                 this.getLogger().info("Update hopefully available at http://dev.bukkit.org/server-mods/tag");
             }
             versionLoaded = (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion);

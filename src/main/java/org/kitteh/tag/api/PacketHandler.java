@@ -199,7 +199,11 @@ public abstract class PacketHandler implements IPacketHandler {
         try {
             this.construct();
         } catch (final Exception e) {
-            this.plugin.getLogger().log(Level.SEVERE, "Found " + this.getVersion() + " but something is wrong.", e);
+            if (this.plugin.getServer().getName().equals("CraftBukkit")) {
+                this.plugin.getLogger().log(Level.SEVERE, "Found CraftBukkit " + this.getVersion() + " but something is wrong.", e);
+            } else {
+                this.plugin.getLogger().log(Level.SEVERE, "Not currently compatible with mod " + this.plugin.getName(), e);
+            }
             this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
             return;
         }
@@ -235,7 +239,7 @@ public abstract class PacketHandler implements IPacketHandler {
         try {
             this.listSwap(player, true);
         } catch (final Exception e) {
-            new TagAPIException("[TagAPI] Failed to inject into networkmanager for " + player.getName(), e).printStackTrace();
+            new TagAPIException("[TagAPI] Failed to inject into network manager for " + player.getName(), e).printStackTrace();
         }
     }
 
@@ -254,7 +258,7 @@ public abstract class PacketHandler implements IPacketHandler {
         }
         final Field field = this.fieldMap.get(clazz);
         if (field == null) {
-            this.handler.debug("Player " + player.getName() + " has incompatible NetworkManager " + clazz.getCanonicalName());
+            this.handler.debug("Player " + player.getName() + " has incompatible network manager " + clazz.getCanonicalName());
             return;
         }
         final List<?> old = (List<?>) field.get(nm);
