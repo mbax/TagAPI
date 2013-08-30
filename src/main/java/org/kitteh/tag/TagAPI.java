@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -234,6 +235,17 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
         this.tickPeriod = tickPeriod;
         this.debug("Storing main thread: " + TagAPI.mainThread.getName());
+
+        final String impName = this.getServer().getName();
+        if (impName.equals("CraftBukkit")) {
+            final String impVersion = this.getServer().getVersion();
+            if (!impVersion.startsWith("git-Bukkit")) {
+                this.getLogger().warning("Inconsistency found: Potential mod detected. TagAPI may not run properly.");
+                this.getLogger().log(Level.WARNING, "Report this to the mod author ASAP", new ModAuthorNagException("Mod claims to be \"CraftBukkit\" but is not. Report this error to the mod author so they can fix it ASAP.\nFound \"CraftBukkit\" \"" + impVersion + "\""));
+            }
+        } else {
+            this.getLogger().warning("Mod detected: \"" + impName + "\". TagAPI may not run properly.");
+        }
 
         String versionLoaded;
 
