@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -240,11 +239,16 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         if (impName.equals("CraftBukkit")) {
             final String impVersion = this.getServer().getVersion();
             if (!impVersion.startsWith("git-Bukkit")) {
-                this.getLogger().warning("Inconsistency found: Potential mod detected. TagAPI may not run properly.");
-                this.getLogger().log(Level.WARNING, "Report this to the mod author ASAP", new ModAuthorNagException("Mod claims to be \"CraftBukkit\" but is not. Report this error to the mod author so they can fix it ASAP.\nFound \"CraftBukkit\" \"" + impVersion + "\""));
+                this.getLogger().warning("Inconsistency found: Potential mod detected. TagAPI may not run properly. Let's try it anyway!");
+                this.getLogger().info("It looks like you're using a mod, but it's claiming to be \"CraftBukkit\" when I ask it.");
+                this.getLogger().info("When I check the version string I get \"" + impVersion + "\" which doesn't sound like CraftBukkit to me (Could be wrong!).");
+                this.getLogger().info("One part of the Bukkit API is a method called getName, which should reply the implementation (mod) name.");
+                this.getLogger().info("If you are running a mod, you should request that the mod author update their implementation name to their mod.");
+                this.getLogger().info("Having this method return accurate results is useful for informative purposes. :)");
+                this.getLogger().info("The above (or below, if your log reads in reverse) message DOES NOT mean there is a problem with TagAPI. Don't panic. Just breathe!");
             }
         } else {
-            this.getLogger().warning("Mod detected: \"" + impName + "\". TagAPI may not run properly.");
+            this.getLogger().warning("Mod detected: \"" + impName + "\". TagAPI may not run properly. Let's try it anyway!");
         }
 
         String versionLoaded;
