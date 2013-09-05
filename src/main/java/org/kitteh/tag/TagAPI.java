@@ -239,7 +239,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         if (impName.equals("CraftBukkit")) {
             final String impVersion = this.getServer().getVersion();
             if (!impVersion.startsWith("git-Bukkit")) {
-                this.getLogger().warning("Inconsistency found: Potential mod detected. TagAPI may not run properly. Let's try it anyway!");
+                this.getLogger().warning("Inconsistency found: Potential mod detected. TagAPI may not run properly. Let's try it anyway! YOLO!");
                 this.getLogger().info("It looks like you're using a mod, but it's claiming to be \"CraftBukkit\" when I ask it.");
                 this.getLogger().info("When I check the version string I get \"" + impVersion + "\" which doesn't sound like CraftBukkit to me (Could be wrong!).");
                 this.getLogger().info("One part of the Bukkit API is a method called getName, which should reply the implementation (mod) name.");
@@ -248,7 +248,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                 this.getLogger().info("The above (or below, if your log reads in reverse) message DOES NOT mean there is a problem with TagAPI. Don't panic. Just breathe!");
             }
         } else {
-            this.getLogger().warning("Mod detected: \"" + impName + "\". TagAPI may not run properly. Let's try it anyway!");
+            this.getLogger().warning("Mod detected: \"" + impName + "\". TagAPI may not run properly. Let's try it anyway! YOLO!");
         }
 
         String versionLoaded;
