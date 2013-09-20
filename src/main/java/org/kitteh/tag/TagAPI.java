@@ -242,9 +242,9 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                 this.getLogger().warning("Inconsistency found: Potential mod detected. TagAPI may not run properly. Let's try it anyway!");
                 this.getLogger().info("It looks like you're using a mod, but it's claiming to be \"CraftBukkit\" when I ask it.");
                 this.getLogger().info("When I check the version string I get \"" + impVersion + "\" which doesn't sound like CraftBukkit to me (Could be wrong!).");
-                this.getLogger().info("One part of the Bukkit API is a method called getName, which should reply the implementation (mod) name.");
-                this.getLogger().info("If you are running a mod, you should request that the mod author update their implementation name to their mod.");
-                this.getLogger().info("Having this method return accurate results is useful for informative purposes. :)");
+//                this.getLogger().info("One part of the Bukkit API is a method called getName, which should reply the implementation (mod) name.");
+//                this.getLogger().info("If you are running a mod, you should request that the mod author update their implementation name to their mod.");
+ //               this.getLogger().info("Having this method return accurate results is useful for informative purposes. :)");
                 this.getLogger().info("The above (or below, if your log reads in reverse) message DOES NOT mean there is a problem with TagAPI. Don't panic. Just breathe!");
             }
         } else {
@@ -269,7 +269,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                     this.handler = (IPacketHandler) clazz.getConstructor(TagHandler.class).newInstance(this);
                 }
             } catch (final Exception e) {
-                this.getLogger().severe("Could not find support for this " + this.getServer().getName() + " version. Check for an update or pester mbaxter.");
+                this.getLogger().severe("Could not find support for this " + this.getServer().getName() + " version (" + cbversion + "). Check for an update or pester mbaxter.");
                 this.getLogger().info("Update hopefully available at http://dev.bukkit.org/server-mods/tag");
             }
             versionLoaded = (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion);
