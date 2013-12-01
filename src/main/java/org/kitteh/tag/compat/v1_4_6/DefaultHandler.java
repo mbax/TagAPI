@@ -19,10 +19,10 @@ import net.minecraft.server.v1_4_6.Packet20NamedEntitySpawn;
 
 import org.bukkit.craftbukkit.v1_4_6.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.kitteh.tag.api.PacketHandler;
+import org.kitteh.tag.api.PacketHandlerListInjection;
 import org.kitteh.tag.api.TagHandler;
 
-public class DefaultHandler extends PacketHandler {
+public class DefaultHandler extends PacketHandlerListInjection {
 
     public DefaultHandler(TagHandler handler) {
         super(handler);

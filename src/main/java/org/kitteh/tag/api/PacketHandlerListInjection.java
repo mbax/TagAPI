@@ -31,7 +31,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 
-public abstract class PacketHandler implements IPacketHandler {
+public abstract class PacketHandlerListInjection implements IPacketHandler {
 
     public class ArrayLizt<E> implements List<E> {
 
@@ -45,20 +45,20 @@ public abstract class PacketHandler implements IPacketHandler {
 
         @Override
         public boolean add(E packet) {
-            PacketHandler.this.handlePacketAdd(packet, this.owner);
+            PacketHandlerListInjection.this.handlePacketAdd(packet, this.owner);
             return this.list.add(packet);
         }
 
         @Override
         public void add(int index, E packet) {
-            PacketHandler.this.handlePacketAdd(packet, this.owner);
+            PacketHandlerListInjection.this.handlePacketAdd(packet, this.owner);
             this.list.add(index, packet);
         }
 
         @Override
         public boolean addAll(Collection<? extends E> packetPile) {
             for (final E packet : packetPile) {
-                PacketHandler.this.handlePacketAdd(packet, this.owner);
+                PacketHandlerListInjection.this.handlePacketAdd(packet, this.owner);
             }
             return this.list.addAll(packetPile);
         }
@@ -66,7 +66,7 @@ public abstract class PacketHandler implements IPacketHandler {
         @Override
         public boolean addAll(int index, Collection<? extends E> packetPile) {
             for (final E packet : packetPile) {
-                PacketHandler.this.handlePacketAdd(packet, this.owner);
+                PacketHandlerListInjection.this.handlePacketAdd(packet, this.owner);
             }
             return this.list.addAll(index, packetPile);
         }
@@ -147,7 +147,7 @@ public abstract class PacketHandler implements IPacketHandler {
 
         @Override
         public E set(int index, E packet) {
-            PacketHandler.this.handlePacketAdd(packet, this.owner);
+            PacketHandlerListInjection.this.handlePacketAdd(packet, this.owner);
             return this.list.set(index, packet);
         }
 
@@ -175,9 +175,9 @@ public abstract class PacketHandler implements IPacketHandler {
 
     public class HandlerListener implements Listener {
 
-        private final PacketHandler handler;
+        private final PacketHandlerListInjection handler;
 
-        public HandlerListener(PacketHandler handler) {
+        public HandlerListener(PacketHandlerListInjection handler) {
             this.handler = handler;
         }
 
@@ -192,7 +192,7 @@ public abstract class PacketHandler implements IPacketHandler {
     private final Plugin plugin;
     private final Map<Class<?>, Field> fieldMap = new HashMap<Class<?>, Field>();
 
-    public PacketHandler(TagHandler handler) {
+    public PacketHandlerListInjection(TagHandler handler) {
         this.plugin = handler.getPlugin();
         this.handler = handler;
         this.plugin.getServer().getPluginManager().registerEvents(new HandlerListener(this), this.plugin);
