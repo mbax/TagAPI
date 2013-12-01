@@ -220,6 +220,7 @@ public abstract class PacketHandlerListInjection extends PacketHandlerBase {
         }
     }
 
+    @Override
     protected void releasePlayer(Player player) {
         try {
             this.listSwap(player, false);
