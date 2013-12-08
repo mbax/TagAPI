@@ -105,6 +105,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
 
     private static TagAPI instance = null;
     private static Thread mainThread = null;
+    private static final int tickPeriod = 5;
 
     /**
      * Flicker the player for anyone who can see him.
@@ -186,7 +187,6 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     private boolean debug;
-    private int tickPeriod;
     private boolean wasEnabled;
     private HashMap<Integer, Player> entityIDMap;
     private IPacketHandler handler;
@@ -229,13 +229,10 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         TagAPI.mainThread = Thread.currentThread();
         this.saveDefaultConfig();
         this.debug = this.getConfig().getBoolean("debug", false);
-        int tickPeriod = this.getConfig().getInt("asyncTickCheckPeriod", 5);
-        if (tickPeriod > 50) {
-            tickPeriod = 50;
-        } else if (tickPeriod < 1) {
-            tickPeriod = 1;
+        if (this.getConfig().contains("asyncTickCheckPeriod")) {
+            this.saveResource("config.yml", true);
+            this.reloadConfig();
         }
-        this.tickPeriod = tickPeriod;
         this.debug("Storing main thread: " + TagAPI.mainThread.getName());
 
         final String impName = this.getServer().getName();
@@ -325,9 +322,16 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                     return true;
                 }
             });
+            long start = System.currentTimeMillis();
             while (!future.isCancelled() && !future.isDone()) {
+                if (System.currentTimeMillis() - start > 1000) {
+                    if (TagAPI.mainThread != null) {
+                        this.getLogger().severe("Something seems to be holding up TagAPI's event. Ignoring for " + playername + " as seen by " + destination.getName());
+                    }
+                    break; // Get out after a HUGE second of waiting
+                }
                 try {
-                    Thread.sleep(TagAPI.this.tickPeriod);
+                    Thread.sleep(TagAPI.tickPeriod);
                 } catch (final InterruptedException e) {
                 }
             }
