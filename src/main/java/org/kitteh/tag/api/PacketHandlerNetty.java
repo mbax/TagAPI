@@ -50,7 +50,7 @@ public abstract class PacketHandlerNetty extends PacketHandlerBase {
 
     }
 
-    public PacketHandlerNetty(TagHandler handler) {
+    public PacketHandlerNetty(TagHandler handler) throws PacketHandlerException {
         super(handler);
     }
 

@@ -16,11 +16,13 @@
 package org.kitteh.tag;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,6 +33,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.kitteh.tag.api.IPacketHandler;
+import org.kitteh.tag.api.PacketHandlerNetty;
 import org.kitteh.tag.api.TagAPIException;
 import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.handler.ProtocolLibHandler;
@@ -253,29 +256,37 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
 
         String versionLoaded;
+        Throwable exception = null;
 
-        if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+        final String packageName = this.getServer().getClass().getPackage().getName();
+        String cbversion = packageName.substring(packageName.lastIndexOf('.') + 1);
+        if (cbversion.equals("craftbukkit")) {
+            cbversion = "pre";
+        }
+        try {
+            final Class<?> clazz = Class.forName("org.kitteh.tag.compat." + cbversion + ".DefaultHandler");
+            if (IPacketHandler.class.isAssignableFrom(clazz)) {
+                this.handler = (IPacketHandler) clazz.getConstructor(TagHandler.class).newInstance(this);
+            }
+        } catch (final Exception e) {
+            if (e instanceof InvocationTargetException) {
+                exception = e.getCause();
+            }
+        }
+        versionLoaded = (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion);
+
+        if (((this.handler == null) || !(this.handler instanceof PacketHandlerNetty)) && this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
             this.getLogger().info("Detected ProtocolLib, using that for handling!");
             this.handler = new ProtocolLibHandler(this);
             versionLoaded = "via ProtocolLib";
-        } else {
-            final String packageName = this.getServer().getClass().getPackage().getName();
-            String cbversion = packageName.substring(packageName.lastIndexOf('.') + 1);
-            if (cbversion.equals("craftbukkit")) {
-                cbversion = "pre";
-            }
-            try {
-                final Class<?> clazz = Class.forName("org.kitteh.tag.compat." + cbversion + ".DefaultHandler");
-                if (IPacketHandler.class.isAssignableFrom(clazz)) {
-                    this.handler = (IPacketHandler) clazz.getConstructor(TagHandler.class).newInstance(this);
-                }
-            } catch (final Exception e) {
-                this.getLogger().severe("Could not find support for this " + this.getServer().getName() + " version (" + cbversion + "). Check for an update or pester mbaxter.");
-                this.getLogger().info("Update hopefully available at http://dev.bukkit.org/server-mods/tag");
-            }
-            versionLoaded = (cbversion.equals("pre") ? "1.4.5-pre-RB" : cbversion);
         }
+
         if (this.handler == null) {
+            this.getLogger().severe("Could not find support for this " + this.getServer().getName() + " version (" + cbversion + "). Check for an update or pester mbaxter.");
+            this.getLogger().info("Update hopefully available at http://dev.bukkit.org/server-mods/tag");
+            if (exception != null) {
+                this.getLogger().log(Level.INFO, "Cause of the failure", exception);
+            }
             this.getServer().getPluginManager().disablePlugin(this);
         }
         if (!this.getServer().getPluginManager().isPluginEnabled(this)) {

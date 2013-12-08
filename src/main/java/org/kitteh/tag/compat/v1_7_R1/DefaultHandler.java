@@ -23,6 +23,7 @@ import net.minecraft.util.com.mojang.authlib.GameProfile;
 
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.kitteh.tag.api.PacketHandlerException;
 import org.kitteh.tag.api.PacketHandlerNetty;
 import org.kitteh.tag.api.TagHandler;
 
@@ -32,7 +33,7 @@ public class DefaultHandler extends PacketHandlerNetty {
     private Field entityIDField;
     private Field gameProfileField;
 
-    public DefaultHandler(TagHandler handler) {
+    public DefaultHandler(TagHandler handler) throws PacketHandlerException {
         super(handler);
     }
 

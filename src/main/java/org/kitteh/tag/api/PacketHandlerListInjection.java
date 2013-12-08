@@ -170,7 +170,7 @@ public abstract class PacketHandlerListInjection extends PacketHandlerBase {
 
     protected final Map<Class<?>, Field> fieldMap = new HashMap<Class<?>, Field>();
 
-    public PacketHandlerListInjection(TagHandler handler) {
+    public PacketHandlerListInjection(TagHandler handler) throws PacketHandlerException {
         super(handler);
     }
 

@@ -15,8 +15,6 @@
  */
 package org.kitteh.tag.api;
 
-import java.util.logging.Level;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -44,20 +42,20 @@ public abstract class PacketHandlerBase implements IPacketHandler {
     protected final TagHandler handler;
     protected final Plugin plugin;
 
-    public PacketHandlerBase(TagHandler handler) {
+    public PacketHandlerBase(TagHandler handler) throws PacketHandlerException {
         this.plugin = handler.getPlugin();
         this.handler = handler;
         this.plugin.getServer().getPluginManager().registerEvents(new HandlerListener(this), this.plugin);
         try {
             this.construct();
         } catch (final Exception e) {
+            String message;
             if (this.plugin.getServer().getName().equals("CraftBukkit")) {
-                this.plugin.getLogger().log(Level.SEVERE, "Found CraftBukkit " + this.getVersion() + " but something is wrong.", e);
+                message = "Found CraftBukkit " + this.getVersion() + " but something is wrong.";
             } else {
-                this.plugin.getLogger().log(Level.SEVERE, "Not currently compatible with mod " + this.plugin.getName(), e);
+                message = "Not currently compatible with mod " + this.plugin.getName();
             }
-            this.plugin.getServer().getPluginManager().disablePlugin(this.plugin);
-            return;
+            throw new PacketHandlerException(message, e);
         }
     }
 
