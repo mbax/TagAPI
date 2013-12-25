@@ -53,7 +53,7 @@ public abstract class PacketHandlerBase implements IPacketHandler {
             if (this.plugin.getServer().getName().equals("CraftBukkit")) {
                 message = "Found CraftBukkit " + this.getVersion() + " but something is wrong.";
             } else {
-                message = "Not currently compatible with mod " + this.plugin.getName();
+                message = "Not currently compatible with mod " + this.plugin.getServer().getName();
             }
             throw new PacketHandlerException(message, e);
         }
