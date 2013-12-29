@@ -187,6 +187,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     private boolean debug;
+    private long eventWait;
     private boolean wasEnabled;
     private HashMap<Integer, Player> entityIDMap;
     private IPacketHandler handler;
@@ -233,6 +234,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             this.saveResource("config.yml", true);
             this.reloadConfig();
         }
+        this.eventWait = this.getConfig().getLong("eventwait");
         this.debug("Storing main thread: " + TagAPI.mainThread.getName());
 
         final String impName = this.getServer().getName();
@@ -324,7 +326,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             });
             long start = System.currentTimeMillis();
             while (!future.isCancelled() && !future.isDone()) {
-                if (System.currentTimeMillis() - start > 1000) {
+                if (System.currentTimeMillis() - start > this.eventWait) {
                     if (TagAPI.mainThread != null) {
                         this.getLogger().severe("Something seems to be holding up TagAPI's event. Ignoring for " + playername + " as seen by " + destination.getName());
                     }
@@ -336,7 +338,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
                 }
             }
             if (future.isCancelled()) {
-                this.debug("Async task for tag of " + named.getName() + " to " + destination.getName() + " was cancelled. Skipping.");
+                this.debug("Sync task for tag of " + named.getName() + " to " + destination.getName() + " was cancelled. Skipping.");
                 return playername;
             }
         } else {
