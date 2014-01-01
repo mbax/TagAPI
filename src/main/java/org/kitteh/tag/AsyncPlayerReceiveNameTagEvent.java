@@ -15,82 +15,58 @@
  */
 package org.kitteh.tag;
 
+import java.util.UUID;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerEvent;
 
 /**
  * Here is where the magic is made.
+ * This event may fire synchronously.
  *
  * Catch this event in order to have an effect on the player's name tag
- * @deprecated in favor of AsyncPlayerReceiveNameTagEvent
  */
-@Deprecated
-public class PlayerReceiveNameTagEvent extends PlayerEvent {
+public class AsyncPlayerReceiveNameTagEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
     /**
      * This is a Bukkit method. Don't touch me.
-     * 
+     *
      * @return registered handlers to Bukkit
      */
     public static HandlerList getHandlerList() {
-        return PlayerReceiveNameTagEvent.handlers;
+        return AsyncPlayerReceiveNameTagEvent.handlers;
     }
 
     private boolean modified;
     private final Player named;
+    private final Player recipient;
     private String tag;
+    private UUID uuid;
 
-    /**
-     * TagAPI creates all the event objects for you.
-     * 
-     * @param who
-     *            The player receiving the nametag info
-     * @param named
-     *            The player whose nametag we're talking about
-     * @deprecated
-     */
-    @Deprecated
-    public PlayerReceiveNameTagEvent(Player who, Player named) {
-        super(who);
-        Validate.notNull(who, "Destination player cannot be null!");
-        Validate.notNull(named, "Named player cannot be null!");
-        this.modified = false;
-        this.named = named;
-        this.tag = named.getName();
-    }
-
-    /**
-     * TagAPI creates all the event objects for you.
-     * 
-     * @param who
-     *            The player receiving the nametag info
-     * @param named
-     *            The player whose nametag we're talking about
-     * @param initialName
-     *            Initial name tag
-     */
-    public PlayerReceiveNameTagEvent(Player who, Player named, String initialName) {
-        super(who);
+    AsyncPlayerReceiveNameTagEvent(Player who, Player named, String initialName, UUID uuid) {
+        super(true);
         Validate.notNull(who, "Destination player cannot be null!");
         Validate.notNull(named, "Named player cannot be null!");
         Validate.notNull(initialName, "Initial player name cannot be null!");
         this.modified = named.getName().equals(initialName);
+        this.recipient = who;
         this.named = named;
         this.tag = initialName;
+        this.uuid = uuid;
     }
 
     @Override
     public HandlerList getHandlers() {
-        return PlayerReceiveNameTagEvent.handlers;
+        return AsyncPlayerReceiveNameTagEvent.handlers;
     }
 
     /**
-     * Get the player whose nametag we're receiving
-     * 
+     * Gets the player whose nametag we're receiving
+     *
      * @return the Player whose name is being affected
      */
     public Player getNamedPlayer() {
@@ -98,31 +74,48 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
     }
 
     /**
-     * Get the nametag that will be sent
-     * 
-     * @return String nametag that will be sent
+     * Gets the player receiving the tag
+     *
+     * @return the Player receiving the tag
+     */
+    public final Player getPlayer() {
+        return recipient;
+    }
+
+    /**
+     * Gets the nametag that will be sent
+     *
+     * @return nametag sent to the player
      */
     public String getTag() {
         return this.tag;
     }
 
     /**
-     * Has the event been modified yet?
-     * 
-     * Excellent method for plugins wishing to be rather passive
-     * 
-     * @return true if the event has had the tag modified
+     * Gets the UUID that will be sent
+     *
+     * @return uuid sent to the player
+     */
+    public UUID getUUID() {
+        return this.uuid;
+    }
+
+    /**
+     * Gets if the event has been modified
+     *
+     * @return true if the event has been modified
      */
     public boolean isModified() {
         return this.modified;
     }
 
     /**
-     * Set the nametag. Will always set the name tag whether returning true or false.
-     * 
-     * @param tag
-     *            The desired tag. Only 16 chars accepted. The rest will be truncated.
-     * @return true if accepted as-is, false if it was too long and was truncated.
+     * Sets the nametag to be sent
+     * Will always set the name tag whether returning true or false.
+     * Nametags over 16 characters will be truncated
+     *
+     * @param tag The desired tag
+     * @return true if accepted as-is, false if it was truncated
      */
     public boolean setTag(String tag) {
         Validate.notNull(tag, "New nametag cannot be null!");
@@ -136,6 +129,17 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Sets the UUID to be sent
+     *
+     * @param uuid UUID to be sent
+     */
+    public void setUUID(UUID uuid) {
+        Validate.notNull(uuid, "New UUID cannot be null!");
+        this.modified = true;
+        this.uuid = uuid;
     }
 
 }

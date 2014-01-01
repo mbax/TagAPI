@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.kitteh.tag.api.PacketHandlerException;
 import org.kitteh.tag.api.PacketHandlerListInjection;
 import org.kitteh.tag.api.TagHandler;
+import org.kitteh.tag.api.TagInfo;
 
 public class DefaultHandler extends PacketHandlerListInjection {
 
@@ -53,7 +54,10 @@ public class DefaultHandler extends PacketHandlerListInjection {
     protected void handlePacketAdd(Object o, Player owner) {
         if (o instanceof Packet20NamedEntitySpawn) {
             final Packet20NamedEntitySpawn packet = ((Packet20NamedEntitySpawn) o);
-            packet.b = this.handler.getNameForPacket20(packet.a, packet.b, owner);;
+            final TagInfo info = this.handler.getNameForPacket20(null, packet.a, packet.b, owner);
+            if (info != null) {
+                packet.b = info.getName();
+            }
         }
     }
 

@@ -15,15 +15,22 @@
  */
 package org.kitteh.tag.api;
 
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
+import java.util.UUID;
 
-public interface TagHandler {
+public final class TagInfo {
+    private final UUID id;
+    private final String name;
 
-    public void debug(String message);
+    public TagInfo(UUID initialUUID, String name) {
+        this.id = initialUUID;
+        this.name = name;
+    }
 
-    public TagInfo getNameForPacket20(String initialUUID, int entityID, String initialName, Player destination);
+    public String getName() {
+        return this.name;
+    }
 
-    public Plugin getPlugin();
-
+    public UUID getUUID() {
+        return this.id;
+    }
 }

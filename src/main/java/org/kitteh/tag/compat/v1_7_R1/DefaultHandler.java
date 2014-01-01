@@ -26,6 +26,7 @@ import org.bukkit.entity.Player;
 import org.kitteh.tag.api.PacketHandlerException;
 import org.kitteh.tag.api.PacketHandlerNetty;
 import org.kitteh.tag.api.TagHandler;
+import org.kitteh.tag.api.TagInfo;
 
 public class DefaultHandler extends PacketHandlerNetty {
 
@@ -43,9 +44,10 @@ public class DefaultHandler extends PacketHandlerNetty {
             final PacketPlayOutNamedEntitySpawn p = (PacketPlayOutNamedEntitySpawn) packet;
             final GameProfile profile = (GameProfile) this.gameProfileField.get(p);
             final String oldName = profile.getName();
-            final String newName = this.handler.getNameForPacket20(this.entityIDField.getInt(p), oldName, destination);
-            if (!newName.equals(oldName)) {
-                this.gameProfileField.set(p, new GameProfile("aaaaaaaaaaaaa", newName)); // TODO: Get the ID?
+            final String oldID = profile.getId();
+            final TagInfo newName = this.handler.getNameForPacket20(oldID, this.entityIDField.getInt(p), oldName, destination);
+            if (newName != null) {
+                this.gameProfileField.set(p, new GameProfile(newName.getUUID().toString().replaceAll("-", ""), newName.getName()));
             }
         }
     }

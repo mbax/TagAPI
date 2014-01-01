@@ -17,6 +17,7 @@ package org.kitteh.tag.handler;
 
 import org.kitteh.tag.TagAPI;
 import org.kitteh.tag.api.IPacketHandler;
+import org.kitteh.tag.api.TagInfo;
 
 import com.comphenix.protocol.Packets;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -50,8 +51,10 @@ public class ProtocolLibHandler implements IPacketHandler {
                 }
                 final PacketContainer packetContainer = event.getPacket();
                 try {
-                    final String newName = ProtocolLibHandler.this.plugin.getNameForPacket20(packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
-                    packetContainer.getSpecificModifier(String.class).write(0, newName);
+                    final TagInfo info = ProtocolLibHandler.this.plugin.getNameForPacket20(null, packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
+                    if (info != null) {
+                        packetContainer.getSpecificModifier(String.class).write(0, info.getName());
+                    }
                 } catch (final FieldAccessException e) {
                     e.printStackTrace();
                 }

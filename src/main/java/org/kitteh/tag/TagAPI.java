@@ -20,9 +20,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,6 +38,7 @@ import org.kitteh.tag.api.IPacketHandler;
 import org.kitteh.tag.api.PacketHandlerNetty;
 import org.kitteh.tag.api.TagAPIException;
 import org.kitteh.tag.api.TagHandler;
+import org.kitteh.tag.api.TagInfo;
 import org.kitteh.tag.handler.ProtocolLibHandler;
 import org.kitteh.tag.metrics.MetricsLite;
 
@@ -106,6 +109,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     private static TagAPI instance = null;
     private static Thread mainThread = null;
     private static final int tickPeriod = 5;
+    private static final Pattern UUID_FIXER = Pattern.compile("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{12})");
 
     /**
      * Flicker the player for anyone who can see him.
@@ -200,12 +204,23 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     @Override
-    public String getNameForPacket20(int entityID, String initialName, Player destination) {
+    public TagInfo getNameForPacket20(String initialUUID, int entityID, String initialName, Player destination) {
         final Player named = this.getPlayer(entityID);
         if (named != null) {
-            return this.getName(named, initialName, destination);
+            UUID uuid = null;
+            if (initialUUID != null) {
+                final String uuidString = TagAPI.UUID_FIXER.matcher(initialUUID).replaceFirst("$1-$2-$3-$4-$5");
+                try {
+                    uuid = UUID.fromString(uuidString);
+                } catch (final IllegalArgumentException e) {
+                }
+            }
+            if (uuid == null) {
+                uuid = named.getUniqueId();
+            }
+            return this.getName(uuid, named, initialName, destination);
         } else {
-            return initialName;
+            return null;
         }
     }
 
@@ -309,47 +324,19 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         }
     }
 
-    private String getName(Player named, String initialName, Player destination) {
-        String playername = initialName;
+    private TagInfo getName(UUID initialUUID, Player named, String initialName, Player destination) {
         if (destination == null) {
             this.debug("Encountered a packet destined for an unknown player. Discarded.");
-            return playername;
+            return null;
         }
-        final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(destination, named, playername);
-        if (!Thread.currentThread().equals(TagAPI.mainThread)) {
-            final Future<Boolean> future = this.getServer().getScheduler().callSyncMethod(this, new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    TagAPI.this.getServer().getPluginManager().callEvent(event);
-                    return true;
-                }
-            });
-            long start = System.currentTimeMillis();
-            while (!future.isCancelled() && !future.isDone()) {
-                if (System.currentTimeMillis() - start > this.eventWait) {
-                    if (TagAPI.mainThread != null) {
-                        this.getLogger().severe("Something seems to be holding up TagAPI's event. Ignoring for " + playername + " as seen by " + destination.getName());
-                    }
-                    break; // Get out after a HUGE second of waiting
-                }
-                try {
-                    Thread.sleep(TagAPI.tickPeriod);
-                } catch (final InterruptedException e) {
-                }
-            }
-            if (future.isCancelled()) {
-                this.debug("Sync task for tag of " + named.getName() + " to " + destination.getName() + " was cancelled. Skipping.");
-                return playername;
-            }
-        } else {
-            this.getServer().getPluginManager().callEvent(event);
-        }
+        final AsyncPlayerReceiveNameTagEvent event = new AsyncPlayerReceiveNameTagEvent(destination, named, initialName, initialUUID);
+        this.handleDeprecatedEvent(event);
+        this.getServer().getPluginManager().callEvent(event);
         String name = event.getTag();
         if (name.length() > 16) {
             name = name.substring(0, 16);
         }
-        playername = name;
-        return playername;
+        return new TagInfo(initialUUID, name);
     }
 
     private Player getPlayer(int entityId) {
@@ -359,6 +346,43 @@ public class TagAPI extends JavaPlugin implements TagHandler {
             return null;
         }
         return named;
+    }
+
+    @SuppressWarnings("deprecation")
+    private void handleDeprecatedEvent(AsyncPlayerReceiveNameTagEvent aEvent) {
+        if (PlayerReceiveNameTagEvent.getHandlerList().getRegisteredListeners().length == 0) {
+            return;
+        }
+        final PlayerReceiveNameTagEvent event = new PlayerReceiveNameTagEvent(aEvent.getPlayer(), aEvent.getNamedPlayer(), aEvent.getTag());
+        if (!Thread.currentThread().equals(TagAPI.mainThread)) {
+            final Future<Boolean> future = this.getServer().getScheduler().callSyncMethod(this, new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    TagAPI.this.getServer().getPluginManager().callEvent(event);
+                    return true;
+                }
+            });
+            final long start = System.currentTimeMillis();
+            while (!future.isCancelled() && !future.isDone()) {
+                if ((TagAPI.mainThread == null) || ((System.currentTimeMillis() - start) > this.eventWait)) {
+                    if (TagAPI.mainThread != null) {
+                        this.getLogger().severe("Event took too long (limit: " + this.eventWait + "ms). Ignoring for " + aEvent.getNamedPlayer().getName() + " as seen by " + aEvent.getPlayer().getName());
+                    }
+                    return;
+                }
+                try {
+                    Thread.sleep(TagAPI.tickPeriod);
+                } catch (final InterruptedException ex) {
+                }
+            }
+            if (future.isCancelled()) {
+                this.debug("Sync task for tag of " + aEvent.getNamedPlayer().getName() + " to " + aEvent.getPlayer().getName() + " was cancelled. Skipping.");
+                return;
+            }
+        } else {
+            this.getServer().getPluginManager().callEvent(event);
+        }
+        aEvent.setTag(event.getTag());
     }
 
     private void in(Player player) {

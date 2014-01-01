@@ -9,7 +9,8 @@
 #   If true, will output debug messages relating to name tags.
 #   Don't use unless asked, or bored.
 # eventwait
-#   How many milliseconds to wait for the event to fire
+#   How many milliseconds to wait for the event to fire on the main thread
+#   Only applies to use of the deprecated event
 #   Default is 1000, which is generally fine
 #
 debug: false
