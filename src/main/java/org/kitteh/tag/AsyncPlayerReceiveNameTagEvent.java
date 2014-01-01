@@ -48,7 +48,7 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
     private UUID uuid;
 
     AsyncPlayerReceiveNameTagEvent(Player who, Player named, String initialName, UUID uuid) {
-        super(true);
+        super(!who.getServer().isPrimaryThread());
         Validate.notNull(who, "Destination player cannot be null!");
         Validate.notNull(named, "Named player cannot be null!");
         Validate.notNull(initialName, "Initial player name cannot be null!");
