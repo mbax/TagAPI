@@ -75,7 +75,10 @@ public abstract class PacketHandlerNetty extends PacketHandlerBase {
 
     @Override
     protected void releasePlayer(Player player) {
-        this.getPipeline(player).remove(TagAPIChannelOutboundHandler.class);
+        final ChannelPipeline pipeline = this.getPipeline(player);
+        if ((pipeline != null) && (pipeline.get(TagAPIChannelOutboundHandler.class) != null)) {
+            this.getPipeline(player).remove(TagAPIChannelOutboundHandler.class);
+        }
     }
 
     protected abstract Field getChannelField();
