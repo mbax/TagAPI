@@ -24,7 +24,7 @@ import org.bukkit.event.HandlerList;
 
 /**
  * Here is where the magic is made.
- * This event may fire synchronously.
+ * This event may fire synchronously, check {@link #isAsynchronous()}
  *
  * Catch this event in order to have an effect on the player's name tag
  */
@@ -93,6 +93,8 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
 
     /**
      * Gets the UUID that will be sent
+     * Applies to MC version 1.7 and above
+     *   otherwise it's a per-server UUID and not sent to the client
      *
      * @return uuid sent to the player
      */
@@ -133,6 +135,8 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
 
     /**
      * Sets the UUID to be sent
+     * Applies to MC version 1.7 and above
+     *   otherwise it's a per-server UUID and not sent to the client
      *
      * @param uuid UUID to be sent
      */
