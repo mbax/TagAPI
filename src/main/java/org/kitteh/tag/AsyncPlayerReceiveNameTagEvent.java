@@ -41,7 +41,8 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
         return AsyncPlayerReceiveNameTagEvent.handlers;
     }
 
-    private boolean modified;
+    private boolean tagModified;
+    private boolean uuidModified;
     private final Player named;
     private final Player recipient;
     private String tag;
@@ -52,7 +53,7 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
         Validate.notNull(who, "Destination player cannot be null!");
         Validate.notNull(named, "Named player cannot be null!");
         Validate.notNull(initialName, "Initial player name cannot be null!");
-        this.modified = named.getName().equals(initialName);
+        this.tagModified = named.getName().equals(initialName);
         this.recipient = who;
         this.named = named;
         this.tag = initialName;
@@ -103,12 +104,21 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
     }
 
     /**
-     * Gets if the event has been modified
+     * Gets if the tag has been modified in this event
      *
-     * @return true if the event has been modified
+     * @return true if the tag has been modified
      */
-    public boolean isModified() {
-        return this.modified;
+    public boolean isTagModified() {
+        return this.tagModified;
+    }
+
+    /**
+     * Gets if the UUID has been modified in this event
+     *
+     * @return true if the UUID has been modified
+     */
+    public boolean isUUIDModified() {
+        return this.uuidModified;
     }
 
     /**
@@ -125,7 +135,7 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
             return true;
         }
         this.tag = tag;
-        this.modified = true;
+        this.tagModified = true;
         if (tag.length() > 16) {
             tag = tag.substring(0, 16);
             return false;
@@ -145,7 +155,7 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
         if (this.uuid.equals(uuid)) {
             return;
         }
-        this.modified = true;
+        this.uuidModified = true;
         this.uuid = uuid;
     }
 
