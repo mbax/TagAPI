@@ -142,6 +142,9 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
      */
     public void setUUID(UUID uuid) {
         Validate.notNull(uuid, "New UUID cannot be null!");
+        if (this.uuid.equals(uuid)) {
+            return;
+        }
         this.modified = true;
         this.uuid = uuid;
     }
