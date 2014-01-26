@@ -336,7 +336,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         if (name.length() > 16) {
             name = name.substring(0, 16);
         }
-        return new TagInfo(initialUUID, name);
+        return new TagInfo(event.getUUID(), name);
     }
 
     private Player getPlayer(int entityId) {
