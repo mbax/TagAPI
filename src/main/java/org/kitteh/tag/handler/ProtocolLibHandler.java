@@ -15,8 +15,8 @@
  */
 package org.kitteh.tag.handler;
 
-import org.kitteh.tag.TagAPI;
 import org.kitteh.tag.api.IPacketHandler;
+import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.api.TagInfo;
 
 import com.comphenix.protocol.Packets;
@@ -30,20 +30,20 @@ import com.comphenix.protocol.reflect.FieldAccessException;
 
 public class ProtocolLibHandler implements IPacketHandler {
 
-    private final TagAPI plugin;
+    private final TagHandler handler;
 
-    public ProtocolLibHandler(TagAPI plugin) {
-        this.plugin = plugin;
+    public ProtocolLibHandler(TagHandler handler) {
+        this.handler = handler;
     }
 
     @Override
     public void shutdown() {
-        ProtocolLibrary.getProtocolManager().removePacketListeners(this.plugin);
+        ProtocolLibrary.getProtocolManager().removePacketListeners(this.handler.getPlugin());
     }
 
     @Override
     public void startup() {
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this.plugin, ConnectionSide.SERVER_SIDE, ListenerPriority.HIGH, Packets.Server.NAMED_ENTITY_SPAWN) {
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(this.handler.getPlugin(), ConnectionSide.SERVER_SIDE, ListenerPriority.HIGH, Packets.Server.NAMED_ENTITY_SPAWN) {
             @Override
             public void onPacketSending(PacketEvent event) {
                 if (event.getPacketID() != Packets.Server.NAMED_ENTITY_SPAWN) {
@@ -51,7 +51,7 @@ public class ProtocolLibHandler implements IPacketHandler {
                 }
                 final PacketContainer packetContainer = event.getPacket();
                 try {
-                    final TagInfo info = ProtocolLibHandler.this.plugin.getNameForPacket20(null, packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
+                    final TagInfo info = ProtocolLibHandler.this.handler.getNameForPacket20(null, packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
                     if (info != null) {
                         packetContainer.getSpecificModifier(String.class).write(0, info.getName());
                     }

@@ -32,7 +32,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.kitteh.tag.api.IPacketHandler;
 import org.kitteh.tag.api.PacketHandlerNetty;
@@ -42,7 +41,7 @@ import org.kitteh.tag.api.TagInfo;
 import org.kitteh.tag.handler.ProtocolLibHandler;
 import org.kitteh.tag.metrics.MetricsLite;
 
-public class TagAPI extends JavaPlugin implements TagHandler {
+public class TagAPI extends JavaPlugin {
 
     @SuppressWarnings("unused")
     private class HeyListen implements Listener {
@@ -195,16 +194,15 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     private boolean wasEnabled;
     private HashMap<Integer, Player> entityIDMap;
     private IPacketHandler handler;
+    private TagHandler tagHandler;
 
-    @Override
-    public void debug(String message) {
+    void debug(String message) {
         if (this.debug) {
             this.getLogger().info(message);
         }
     }
 
-    @Override
-    public TagInfo getNameForPacket20(String initialUUID, int entityID, String initialName, Player destination) {
+    TagInfo getNameForPacket20(String initialUUID, int entityID, String initialName, Player destination) {
         final Player named = this.getPlayer(entityID);
         if (named != null) {
             UUID uuid = null;
@@ -225,11 +223,6 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     }
 
     @Override
-    public Plugin getPlugin() {
-        return this;
-    }
-
-    @Override
     public void onDisable() {
         if (this.wasEnabled) {
             this.handler.shutdown();
@@ -241,6 +234,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
     @Override
     public void onEnable() {
         TagAPI.instance = this;
+        this.tagHandler = new TagAPIHandler(this);
         this.entityIDMap = new HashMap<Integer, Player>();
         TagAPI.mainThread = Thread.currentThread();
         this.saveDefaultConfig();
@@ -280,7 +274,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
         try {
             final Class<?> clazz = Class.forName("org.kitteh.tag.compat." + cbversion + ".DefaultHandler");
             if (IPacketHandler.class.isAssignableFrom(clazz)) {
-                this.handler = (IPacketHandler) clazz.getConstructor(TagHandler.class).newInstance(this);
+                this.handler = (IPacketHandler) clazz.getConstructor(TagHandler.class).newInstance(this.tagHandler);
             }
         } catch (final Exception e) {
             if (e instanceof InvocationTargetException) {
@@ -291,7 +285,7 @@ public class TagAPI extends JavaPlugin implements TagHandler {
 
         if (((this.handler == null) || !(this.handler instanceof PacketHandlerNetty)) && this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
             this.getLogger().info("Detected ProtocolLib, using that for handling!");
-            this.handler = new ProtocolLibHandler(this);
+            this.handler = new ProtocolLibHandler(this.tagHandler);
             versionLoaded = "via ProtocolLib";
         }
 
