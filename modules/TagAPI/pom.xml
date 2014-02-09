@@ -9,7 +9,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <version>3.0</version>
+  <version>3.0.1-SNAPSHOT</version>
 
   <repositories>
     <repository>
@@ -210,6 +210,14 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <configuration>
+          <excludePackageNames>org.kitteh.tag.api:org.kitteh.tag.compat.*:org.kitteh.tag.handler:org.kitteh.tag.metrics</excludePackageNames>
+        </configuration>
       </plugin>
     </plugins>
   </build>
