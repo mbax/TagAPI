@@ -196,32 +196,6 @@ public class TagAPI extends JavaPlugin {
     private IPacketHandler handler;
     private TagHandler tagHandler;
 
-    void debug(String message) {
-        if (this.debug) {
-            this.getLogger().info(message);
-        }
-    }
-
-    TagInfo getNameForPacket20(String initialUUID, int entityID, String initialName, Player destination) {
-        final Player named = this.getPlayer(entityID);
-        if (named != null) {
-            UUID uuid = null;
-            if (initialUUID != null) {
-                final String uuidString = TagAPI.UUID_FIXER.matcher(initialUUID).replaceFirst("$1-$2-$3-$4-$5");
-                try {
-                    uuid = UUID.fromString(uuidString);
-                } catch (final IllegalArgumentException e) {
-                }
-            }
-            if (uuid == null) {
-                uuid = named.getUniqueId();
-            }
-            return this.getName(uuid, named, initialName, destination);
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public void onDisable() {
         if (this.wasEnabled) {
@@ -381,6 +355,32 @@ public class TagAPI extends JavaPlugin {
 
     private void in(Player player) {
         this.entityIDMap.put(player.getEntityId(), player);
+    }
+
+    void debug(String message) {
+        if (this.debug) {
+            this.getLogger().info(message);
+        }
+    }
+
+    TagInfo getNameForPacket20(String initialUUID, int entityID, String initialName, Player destination) {
+        final Player named = this.getPlayer(entityID);
+        if (named != null) {
+            UUID uuid = null;
+            if (initialUUID != null) {
+                final String uuidString = TagAPI.UUID_FIXER.matcher(initialUUID).replaceFirst("$1-$2-$3-$4-$5");
+                try {
+                    uuid = UUID.fromString(uuidString);
+                } catch (final IllegalArgumentException e) {
+                }
+            }
+            if (uuid == null) {
+                uuid = named.getUniqueId();
+            }
+            return this.getName(uuid, named, initialName, destination);
+        } else {
+            return null;
+        }
     }
 
 }
