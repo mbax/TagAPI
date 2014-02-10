@@ -24,11 +24,12 @@ import org.bukkit.event.HandlerList;
 
 /**
  * Here is where the magic is made.
+ * <p>
  * This event may fire synchronously, check {@link #isAsynchronous()}
- *
+ * <p>
  * Catch this event in order to have an effect on the player's name tag
  */
-public class AsyncPlayerReceiveNameTagEvent extends Event {
+public final class AsyncPlayerReceiveNameTagEvent extends Event {
 
     private static final HandlerList handlers = new HandlerList();
 
@@ -94,8 +95,10 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
 
     /**
      * Gets the UUID that will be sent
+     * <p>
      * Applies to MC version 1.7 and above
-     *   otherwise it's a per-server UUID and not sent to the client
+     * <p>
+     * In prior versions it's a per-server UUID and not sent to the client
      *
      * @return uuid sent to the player
      */
@@ -123,7 +126,9 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
 
     /**
      * Sets the nametag to be sent
+     * <p>
      * Will always set the name tag whether returning true or false.
+     * <p>
      * Nametags over 16 characters will be truncated
      *
      * @param tag The desired tag
@@ -145,8 +150,10 @@ public class AsyncPlayerReceiveNameTagEvent extends Event {
 
     /**
      * Sets the UUID to be sent
-     * Applies to MC version 1.7 and above
-     *   otherwise it's a per-server UUID and not sent to the client
+     * <p>
+     * Applies to MC version 1.7 and above.
+     * <p>
+     * In prior versions it's a per-server UUID and not sent to the client
      *
      * @param uuid UUID to be sent
      */

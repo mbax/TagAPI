@@ -217,6 +217,9 @@
         <version>2.9.1</version>
         <configuration>
           <excludePackageNames>org.kitteh.tag.api:org.kitteh.tag.compat.*:org.kitteh.tag.handler:org.kitteh.tag.metrics</excludePackageNames>
+          <links>
+            <link>http://jd.bukkit.org/dev/apidocs/</link>
+          </links>
         </configuration>
       </plugin>
     </plugins>

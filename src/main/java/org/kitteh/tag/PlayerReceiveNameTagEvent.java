@@ -22,9 +22,9 @@ import org.bukkit.event.player.PlayerEvent;
 
 /**
  * Here is where the magic is made.
- *
+ * <p>
  * Catch this event in order to have an effect on the player's name tag
- * @deprecated in favor of AsyncPlayerReceiveNameTagEvent
+ * @deprecated Instead, use {@link AsyncPlayerReceiveNameTagEvent}
  */
 @Deprecated
 public class PlayerReceiveNameTagEvent extends PlayerEvent {
@@ -33,7 +33,7 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
 
     /**
      * This is a Bukkit method. Don't touch me.
-     * 
+     *
      * @return registered handlers to Bukkit
      */
     public static HandlerList getHandlerList() {
@@ -46,12 +46,10 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
 
     /**
      * TagAPI creates all the event objects for you.
-     * 
-     * @param who
-     *            The player receiving the nametag info
-     * @param named
-     *            The player whose nametag we're talking about
-     * @deprecated
+     *
+     * @param who The player receiving the nametag info
+     * @param named The player whose nametag we're talking about
+     * @deprecated You should not be creating this yourself!
      */
     @Deprecated
     public PlayerReceiveNameTagEvent(Player who, Player named) {
@@ -65,14 +63,13 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
 
     /**
      * TagAPI creates all the event objects for you.
-     * 
-     * @param who
-     *            The player receiving the nametag info
-     * @param named
-     *            The player whose nametag we're talking about
-     * @param initialName
-     *            Initial name tag
+     *
+     * @param who The player receiving the nametag info
+     * @param named The player whose nametag we're talking about
+     * @param initialName Initial name tag
+     * @deprecated You should not be creating this yourself!
      */
+    @Deprecated
     public PlayerReceiveNameTagEvent(Player who, Player named, String initialName) {
         super(who);
         Validate.notNull(who, "Destination player cannot be null!");
@@ -90,7 +87,7 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
 
     /**
      * Get the player whose nametag we're receiving
-     * 
+     *
      * @return the Player whose name is being affected
      */
     public Player getNamedPlayer() {
@@ -99,7 +96,7 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
 
     /**
      * Get the nametag that will be sent
-     * 
+     *
      * @return String nametag that will be sent
      */
     public String getTag() {
@@ -108,9 +105,9 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
 
     /**
      * Has the event been modified yet?
-     * 
+     * <p>
      * Excellent method for plugins wishing to be rather passive
-     * 
+     *
      * @return true if the event has had the tag modified
      */
     public boolean isModified() {
@@ -118,11 +115,13 @@ public class PlayerReceiveNameTagEvent extends PlayerEvent {
     }
 
     /**
-     * Set the nametag. Will always set the name tag whether returning true or false.
-     * 
-     * @param tag
-     *            The desired tag. Only 16 chars accepted. The rest will be truncated.
-     * @return true if accepted as-is, false if it was too long and was truncated.
+     * Set the nametag. Will always set the name tag whether returning true
+     * or false.
+     *
+     * @param tag The desired tag. Only 16 chars accepted. The rest will be
+     *      truncated.
+     * @return true if accepted as-is, false if it was too long and was
+     *      truncated.
      */
     public boolean setTag(String tag) {
         Validate.notNull(tag, "New nametag cannot be null!");
