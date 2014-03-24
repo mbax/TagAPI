@@ -54,7 +54,7 @@ public class DefaultHandler extends PacketHandlerNetty {
 
     @Override
     protected void construct() throws NoSuchFieldException, SecurityException {
-        this.channelField = NetworkManager.class.getDeclaredField("k");
+        this.channelField = NetworkManager.class.getDeclaredField("m");
         this.channelField.setAccessible(true);
         this.entityIDField = PacketPlayOutNamedEntitySpawn.class.getDeclaredField("a");
         this.entityIDField.setAccessible(true);
