@@ -15,15 +15,14 @@
  */
 package org.kitteh.tag.api;
 
-import java.lang.reflect.Field;
-
 import net.minecraft.util.io.netty.channel.Channel;
 import net.minecraft.util.io.netty.channel.ChannelHandlerContext;
 import net.minecraft.util.io.netty.channel.ChannelOutboundHandlerAdapter;
 import net.minecraft.util.io.netty.channel.ChannelPipeline;
 import net.minecraft.util.io.netty.channel.ChannelPromise;
-
 import org.bukkit.entity.Player;
+
+import java.lang.reflect.Field;
 
 public abstract class PacketHandlerNetty extends PacketHandlerBase {
 
@@ -52,6 +51,10 @@ public abstract class PacketHandlerNetty extends PacketHandlerBase {
 
     public PacketHandlerNetty(TagHandler handler) throws PacketHandlerException {
         super(handler);
+        Field field = this.getChannelField();
+        if (!Channel.class.isAssignableFrom(field.getType())) {
+            throw new PacketHandlerException(field.getDeclaringClass().getSimpleName() + "'s " + field.getName() + " field is not of type Channel");
+        }
     }
 
     protected ChannelPipeline getPipeline(Player player) {

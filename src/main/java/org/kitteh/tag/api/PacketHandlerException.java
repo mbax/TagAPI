@@ -21,4 +21,8 @@ public class PacketHandlerException extends Exception {
     public PacketHandlerException(String message, Exception e) {
         super(message, e);
     }
+
+    public PacketHandlerException(String message) {
+        super(message);
+    }
 }
