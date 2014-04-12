@@ -20,6 +20,8 @@ import org.bukkit.plugin.Plugin;
 import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.api.TagInfo;
 
+import java.util.UUID;
+
 class TagAPIHandler implements TagHandler {
 
     private TagAPI plugin;
@@ -35,6 +37,11 @@ class TagAPIHandler implements TagHandler {
 
     @Override
     public TagInfo getNameForPacket20(String initialUUID, int entityID, String initialName, Player destination) {
+        return this.plugin.getNameForPacket20(initialUUID, entityID, initialName, destination);
+    }
+
+    @Override
+    public TagInfo getNameForPacket20(UUID initialUUID, int entityID, String initialName, Player destination) {
         return this.plugin.getNameForPacket20(initialUUID, entityID, initialName, destination);
     }
 

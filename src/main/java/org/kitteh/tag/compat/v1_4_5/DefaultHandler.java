@@ -54,7 +54,7 @@ public class DefaultHandler extends PacketHandlerListInjection {
     protected void handlePacketAdd(Object o, Player owner) {
         if (o instanceof Packet20NamedEntitySpawn) {
             final Packet20NamedEntitySpawn packet = ((Packet20NamedEntitySpawn) o);
-            final TagInfo info = this.handler.getNameForPacket20(null, packet.a, packet.b, owner);
+            final TagInfo info = this.handler.getNameForPacket20((String) null, packet.a, packet.b, owner);
             if (info != null) {
                 packet.b = info.getName();
             }

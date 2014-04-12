@@ -18,11 +18,15 @@ package org.kitteh.tag.api;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.UUID;
+
 public interface TagHandler {
 
     public void debug(String message);
 
     public TagInfo getNameForPacket20(String initialUUID, int entityID, String initialName, Player destination);
+
+    public TagInfo getNameForPacket20(UUID initialUUID, int entityID, String initialName, Player destination);
 
     public Plugin getPlugin();
 

@@ -51,7 +51,7 @@ public class ProtocolLibHandler implements IPacketHandler {
                 }
                 final PacketContainer packetContainer = event.getPacket();
                 try {
-                    final TagInfo info = ProtocolLibHandler.this.handler.getNameForPacket20(null, packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
+                    final TagInfo info = ProtocolLibHandler.this.handler.getNameForPacket20((String) null, packetContainer.getSpecificModifier(int.class).read(0), packetContainer.getSpecificModifier(String.class).read(0), event.getPlayer());
                     if (info != null) {
                         packetContainer.getSpecificModifier(String.class).write(0, info.getName());
                     }

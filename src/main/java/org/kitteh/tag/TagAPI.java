@@ -15,17 +15,6 @@
  */
 package org.kitteh.tag;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.regex.Pattern;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,6 +29,17 @@ import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.api.TagInfo;
 import org.kitteh.tag.handler.ProtocolLibHandler;
 import org.kitteh.tag.metrics.MetricsLite;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 public class TagAPI extends JavaPlugin {
 
@@ -381,6 +381,14 @@ public class TagAPI extends JavaPlugin {
         } else {
             return null;
         }
+    }
+
+    TagInfo getNameForPacket20(UUID initialUUID, int entityID, String initialName, Player destination) {
+        final Player named = this.getPlayer(entityID);
+        if (named != null) {
+            return this.getName(initialUUID, named, initialName, destination);
+        }
+        return null;
     }
 
 }

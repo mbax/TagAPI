@@ -15,12 +15,12 @@
  */
 package org.kitteh.tag;
 
-import java.util.UUID;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import java.util.UUID;
 
 /**
  * Here is where the magic is made.
@@ -149,14 +149,12 @@ public final class AsyncPlayerReceiveNameTagEvent extends Event {
     }
 
     /**
-     * Sets the UUID to be sent
-     * <p>
-     * Applies to MC version 1.7 and above.
-     * <p>
-     * In prior versions it's a per-server UUID and not sent to the client
+     * DUE TO MOJANG DESIGN DECISIONS, NO LONGER FUNCTIONS 1.7.6+.
      *
      * @param uuid UUID to be sent
+     * @deprecated
      */
+    @Deprecated
     public void setUUID(UUID uuid) {
         Validate.notNull(uuid, "New UUID cannot be null!");
         if (this.uuid.equals(uuid)) {
