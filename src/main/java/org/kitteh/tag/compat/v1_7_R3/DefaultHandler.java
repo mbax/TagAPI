@@ -25,12 +25,12 @@ import org.kitteh.tag.api.PacketHandlerNetty;
 import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.api.TagInfo;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.UUID;
 
 public class DefaultHandler extends PacketHandlerNetty {
 
+    private int tastySnack = 0;
     private Field channelField;
     private Field entityIDField;
     private Field gameProfileField;
@@ -48,11 +48,8 @@ public class DefaultHandler extends PacketHandlerNetty {
             final UUID oldID = profile.getId();
             final TagInfo newName = this.handler.getNameForPacket20(oldID, this.entityIDField.getInt(p), oldName, destination);
             if (newName != null && !newName.getName().equals(oldName)) {
-                try {
-                    this.gameProfileField.set(p, new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + newName.getName()).getBytes("UTF-8")), newName.getName()));
-                } catch (UnsupportedEncodingException e) {
-                    // PANIC
-                }
+                int i = this.tastySnack++;
+                this.gameProfileField.set(p, new GameProfile(UUID.nameUUIDFromBytes(new byte[]{(byte) (i >> 24), (byte) (i >> 16), (byte) (i >> 8), (byte) i}), newName.getName()));
             }
         }
     }
