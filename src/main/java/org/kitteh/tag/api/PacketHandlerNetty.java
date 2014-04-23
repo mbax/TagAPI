@@ -23,8 +23,51 @@ import net.minecraft.util.io.netty.channel.ChannelPromise;
 import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public abstract class PacketHandlerNetty extends PacketHandlerBase {
+
+    private class DisposalCrew extends Thread {
+        private int count = 0;
+        private boolean finished = false;
+        private final Queue<ChannelPipeline> junkHeap = new ConcurrentLinkedQueue<ChannelPipeline>();
+
+        @Override
+        public void run() {
+            while (!this.finished || !this.junkHeap.isEmpty()) {
+                long destination = System.currentTimeMillis() + 3333; // THREE
+                while (this.junkHeap.isEmpty()) {
+                    if (System.currentTimeMillis() > destination) {
+                        System.out.println("TagAPI just failed miserably to clean up.. Report this to mbaxter: [Remaining: " + this.junkHeap.size() + "+, Total:" + this.count + "]");
+                        return;
+                    }
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+                clean();
+            }
+        }
+
+        private void clean() {
+            ChannelPipeline trash;
+            while ((trash = this.junkHeap.poll()) != null) {
+                trash.remove(TagAPIChannelOutboundHandler.class);
+            }
+        }
+
+        private void dispose(ChannelPipeline pipeline) {
+            this.junkHeap.add(pipeline);
+            this.count++;
+        }
+
+        private void finished() {
+            this.finished = true;
+        }
+    }
 
     /**
      * Must be public to remove from netty pipeline
@@ -49,12 +92,22 @@ public abstract class PacketHandlerNetty extends PacketHandlerBase {
 
     }
 
+    private DisposalCrew disposalCrew;
+
     public PacketHandlerNetty(TagHandler handler) throws PacketHandlerException {
         super(handler);
         Field field = this.getChannelField();
         if (!Channel.class.isAssignableFrom(field.getType())) {
             throw new PacketHandlerException(field.getDeclaringClass().getSimpleName() + "'s " + field.getName() + " field is not of type Channel");
         }
+    }
+
+    private void dispose(ChannelPipeline pipeline) {
+        if (this.disposalCrew == null) {
+            this.disposalCrew = new DisposalCrew();
+            this.disposalCrew.start();
+        }
+        this.disposalCrew.dispose(pipeline);
     }
 
     protected ChannelPipeline getPipeline(Player player) {
@@ -80,7 +133,15 @@ public abstract class PacketHandlerNetty extends PacketHandlerBase {
     protected void releasePlayer(Player player) {
         final ChannelPipeline pipeline = this.getPipeline(player);
         if ((pipeline != null) && (pipeline.get(TagAPIChannelOutboundHandler.class) != null)) {
-            this.getPipeline(player).remove(TagAPIChannelOutboundHandler.class);
+            this.dispose(pipeline);
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        super.shutdown();
+        if (this.disposalCrew != null) {
+            this.disposalCrew.finished();
         }
     }
 
