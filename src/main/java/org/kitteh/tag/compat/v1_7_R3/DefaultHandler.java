@@ -53,7 +53,7 @@ public class DefaultHandler extends PacketHandlerNetty {
                 GameProfile newProfile = new GameProfile(newName.getUUID(), newName.getName());
                 PropertiesResult.Properties properties = PropertiesResult.getProperties(newName.getUUID().toString().replaceAll("-", ""), false);
                 Property property = new Property(properties.name, properties.value, properties.signature);
-                newProfile.getProperties().clear();
+                //newProfile.getProperties().clear();
                 newProfile.getProperties().put(property.getName(), property);
                 this.gameProfileField.set(p, newProfile);
             }
