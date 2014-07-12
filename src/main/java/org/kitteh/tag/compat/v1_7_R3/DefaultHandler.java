@@ -18,6 +18,7 @@ package org.kitteh.tag.compat.v1_7_R3;
 import net.minecraft.server.v1_7_R3.NetworkManager;
 import net.minecraft.server.v1_7_R3.PacketPlayOutNamedEntitySpawn;
 import net.minecraft.util.com.mojang.authlib.GameProfile;
+import net.minecraft.util.com.mojang.authlib.properties.Property;
 import org.bukkit.craftbukkit.v1_7_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.kitteh.tag.api.PacketHandlerException;
@@ -49,7 +50,12 @@ public class DefaultHandler extends PacketHandlerNetty {
             final TagInfo newName = this.handler.getNameForPacket20(oldID, this.entityIDField.getInt(p), oldName, destination);
             if (newName != null && !newName.getName().equals(oldName)) {
                 int i = this.tastySnack++;
-                this.gameProfileField.set(p, new GameProfile(UUID.nameUUIDFromBytes(new byte[]{(byte) (i >> 24), (byte) (i >> 16), (byte) (i >> 8), (byte) i}), newName.getName()));
+                GameProfile newProfile = new GameProfile(newName.getUUID(), newName.getName());
+                PropertiesResult.Properties properties = PropertiesResult.getProperties(newName.getUUID().toString().replaceAll("-", ""), false);
+                Property property = new Property(properties.name, properties.value, properties.signature);
+                //newProfile.getProperties().clear();
+                newProfile.getProperties().put(property.getName(), property);
+                this.gameProfileField.set(p, newProfile);
             }
         }
     }
