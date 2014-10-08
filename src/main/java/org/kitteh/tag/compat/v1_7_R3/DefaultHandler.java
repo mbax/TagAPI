@@ -18,6 +18,8 @@ package org.kitteh.tag.compat.v1_7_R3;
 import net.minecraft.server.v1_7_R3.NetworkManager;
 import net.minecraft.server.v1_7_R3.PacketPlayOutNamedEntitySpawn;
 import net.minecraft.util.com.mojang.authlib.GameProfile;
+import net.minecraft.util.com.mojang.authlib.properties.Property;
+import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_7_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.kitteh.tag.api.PacketHandlerException;
@@ -26,6 +28,7 @@ import org.kitteh.tag.api.TagHandler;
 import org.kitteh.tag.api.TagInfo;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 import java.util.UUID;
 
 public class DefaultHandler extends PacketHandlerNetty {
@@ -49,7 +52,14 @@ public class DefaultHandler extends PacketHandlerNetty {
             final TagInfo newName = this.handler.getNameForPacket20(oldID, this.entityIDField.getInt(p), oldName, destination);
             if (newName != null && !newName.getName().equals(oldName)) {
                 int i = this.tastySnack++;
-                this.gameProfileField.set(p, new GameProfile(UUID.nameUUIDFromBytes(new byte[]{(byte) (i >> 24), (byte) (i >> 16), (byte) (i >> 8), (byte) i}), newName.getName()));
+                GameProfile newProfile = new GameProfile(UUID.nameUUIDFromBytes(new byte[]{(byte) (i >> 24), (byte) (i >> 16), (byte) (i >> 8), (byte) i}), newName.getName());
+                if (ChatColor.stripColor(newName.getName()).equalsIgnoreCase(oldName)) {
+                    // If it's the same name, send that skin data.
+                    for (Map.Entry<String, Property> property : profile.getProperties().entries()) {
+                        newProfile.getProperties().put(property.getKey(), property.getValue());
+                    }
+                }
+                this.gameProfileField.set(p, newProfile);
             }
         }
     }
