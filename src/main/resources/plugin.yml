@@ -1,6 +1,6 @@
 name: TagAPI
 main: org.kitteh.tag.TagAPI
-author: mbaxter
+authors: [mbaxter]
 description: Name tag API
 version: '${project.version}'
 softdepend: [ProtocolLib]
